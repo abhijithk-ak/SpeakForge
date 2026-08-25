@@ -1,0 +1,84 @@
+.problem-section {
+  background-color: var(--bg-secondary);
+}
+
+.section-header {
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto 60px auto;
+}
+
+.section-tag {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--primary);
+  margin-bottom: 12px;
+}
+
+.section-title {
+  margin-bottom: 20px;
+  color: var(--text);
+}
+
+.section-subtitle {
+  font-size: 18px;
+  color: var(--text-muted);
+}
+
+/* Grid Layout overrides if needed */
+.problems-grid {
+  gap: 30px;
+}
+
+.problem-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  text-align: left;
+}
+
+.problem-icon {
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.problem-icon-svg {
+  width: 32px;
+  height: 32px;
+  color: var(--primary);
+}
+
+.problem-title {
+  font-size: 22px;
+  color: var(--text);
+}
+
+.problem-quote {
+  font-size: 15px;
+  font-style: italic;
+  color: var(--primary);
+  border-left: 2px solid var(--primary);
+  padding-left: 14px;
+  line-height: 1.4;
+}
+
+[data-theme="light"] .problem-quote {
+  color: var(--primary);
+  border-left-color: var(--primary);
+}
+
+.problem-desc {
+  font-size: 15px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+@media (max-width: 768px) {
+  .section-header {
+    margin-bottom: 40px;
+  }
+}

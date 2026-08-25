@@ -1,0 +1,137 @@
+/* Settings Options Styles
+   Uses existing color tokens */
+
+.settings-container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 32px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  box-sizing: border-box;
+}
+
+/* Page Section Wrappers */
+.settings-sections-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.settings-section-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.settings-section-desc {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0 0 8px 0;
+  line-height: 1.5;
+}
+
+/* Alert Boxes */
+.settings-alert {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 8px;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.settings-alert.alert-success {
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  color: var(--success);
+}
+
+.settings-alert.alert-error {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: var(--error);
+}
+
+/* Appearance Theme Row */
+.theme-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg);
+  padding: 16px 20px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color, rgba(255,255,255,0.08));
+}
+
+.theme-status-label {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.theme-status-label strong {
+  color: var(--primary);
+}
+
+/* Password Form Fields */
+.settings-password-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.settings-submit-btn {
+  align-self: flex-start;
+  margin-top: 8px;
+}
+
+/* Danger Zone Cards */
+.danger-zone-card {
+  border-color: rgba(239, 68, 68, 0.2);
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.02) 0%, transparent 100%);
+}
+
+.danger-zone-header-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.danger-icon {
+  color: var(--error);
+  flex-shrink: 0;
+}
+
+.danger-title {
+  color: var(--text-primary) !important;
+}
+
+.btn-danger {
+  background: var(--error);
+  color: white;
+  border: none;
+  align-self: flex-start;
+  margin-top: 8px;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: #dc2626; /* Darker red */
+}
+
+/* Responsive adjustment */
+@media (max-width: 640px) {
+  .theme-toggle-row {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+    text-align: center;
+  }
+  
+  .settings-submit-btn, .delete-account-btn {
+    width: 100%;
+  }
+}

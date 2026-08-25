@@ -1,0 +1,185 @@
+/* Usage Page Options Styles
+   Uses existing color variables */
+
+.usage-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 32px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  box-sizing: border-box;
+}
+
+.usage-sections-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.usage-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.usage-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.usage-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.usage-icon {
+  flex-shrink: 0;
+}
+
+.usage-icon.purple {
+  color: var(--primary);
+}
+
+.usage-icon.cyan {
+  color: var(--accent);
+}
+
+.usage-icon.muted {
+  color: var(--text-secondary);
+  opacity: 0.5;
+}
+
+.usage-card-title {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+/* Plan details styles */
+.usage-plan-details {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex-grow: 1;
+}
+
+.plan-type-badge {
+  align-self: flex-start;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  background: rgba(6, 182, 212, 0.08);
+  border: 1px solid rgba(6, 182, 212, 0.15);
+  padding: 4px 10px;
+  border-radius: 4px;
+}
+
+.plan-meta-row {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  border-bottom: 1px solid var(--border-color, rgba(255,255,255,0.06));
+  padding-bottom: 8px;
+}
+
+.plan-meta-label {
+  color: var(--text-secondary);
+}
+
+.plan-meta-value {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+/* Progress details styles */
+.usage-progress-details {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex-grow: 1;
+}
+
+.usage-text-row {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.usage-progress-track {
+  width: 100%;
+  height: 8px;
+  background: var(--bg);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.usage-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
+  border-radius: 4px;
+}
+
+.usage-renewal-notice {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin: 4px 0 0 0;
+  line-height: 1.4;
+}
+
+/* Purchase details card */
+.purchase-time-card {
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.03) 0%, transparent 100%);
+}
+
+.purchase-desc {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.purchase-placeholder-badge, .history-placeholder-badge {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: var(--bg);
+  border: 1px dashed var(--border-color, rgba(255,255,255,0.15));
+  padding: 12px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.history-placeholder-card {
+  opacity: 0.7;
+}
+
+.usage-error-state {
+  align-items: center;
+  justify-content: center;
+  min-height: 40vh;
+  text-align: center;
+}
+
+.error-icon {
+  color: var(--error);
+  margin-bottom: 8px;
+}
+
+/* Responsive adjustment */
+@media (max-width: 640px) {
+  .usage-summary-grid {
+    grid-template-columns: 1fr;
+  }
+}

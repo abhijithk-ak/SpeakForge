@@ -1,0 +1,300 @@
+/* Onboarding Flow Page Styles
+   Uses existing CSS variables from index.css */
+
+.onboard-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--bg);
+}
+
+.onboard-card {
+  width: 100%;
+  max-width: 580px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 40px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+/* Progress header */
+.onboard-progress-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 16px;
+}
+
+.progress-text {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.progress-dots-row {
+  display: flex;
+  gap: 6px;
+}
+
+.progress-dot {
+  width: 24px;
+  height: 4px;
+  border-radius: 2px;
+  background-color: var(--border);
+  transition: var(--transition-smooth);
+}
+
+.progress-dot.active {
+  background-color: var(--primary);
+  width: 32px;
+}
+
+.progress-dot.completed {
+  background-color: var(--accent);
+}
+
+/* Error message */
+.onboard-error {
+  padding: 12px 16px;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 8px;
+  color: var(--error);
+  font-size: 13px;
+}
+
+/* Step body content */
+.onboard-step-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: step-fade-in 0.4s ease-out;
+}
+
+@keyframes step-fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.onboard-step-title {
+  font-family: var(--font-sans);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+}
+
+.onboard-step-subtitle {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: var(--text-muted);
+  margin: 0 0 16px 0;
+  line-height: 1.5;
+}
+
+/* Clickable cards grid */
+.onboard-options-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.onboard-option-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 16px 20px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  cursor: pointer;
+  text-align: left;
+  transition: var(--transition-smooth);
+  box-sizing: border-box;
+}
+
+.onboard-option-card:hover {
+  border-color: var(--border-hover);
+  background: var(--surface);
+}
+
+.onboard-option-card.selected {
+  border-color: var(--primary);
+  background: rgba(124, 58, 237, 0.05);
+  box-shadow: 0 0 12px rgba(124, 58, 237, 0.08);
+}
+
+.option-label-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.option-label-text {
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.option-desc-text {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.option-selected-icon {
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+/* Step 5 text form */
+.step-icon-badge {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: rgba(124, 58, 237, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.badge-spark-icon {
+  color: var(--primary);
+}
+
+.onboard-text-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin-top: 12px;
+}
+
+.text-field-container {
+  width: 100%;
+}
+
+.onboard-text-input {
+  width: 100%;
+  padding: 14px 16px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 15px;
+  font-family: var(--font-sans);
+  outline: none;
+  transition: var(--transition-smooth);
+  box-sizing: border-box;
+}
+
+.onboard-text-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 8px rgba(124, 58, 237, 0.15);
+}
+
+.onboard-text-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Footer layout */
+.onboard-footer-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid var(--border);
+  padding-top: 24px;
+  margin-top: 8px;
+}
+
+.back-btn-spacer {
+  flex-shrink: 0;
+}
+
+.footer-right-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  border: none;
+}
+
+.btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.onboard-next-btn, .onboard-submit-btn {
+  background: var(--primary);
+  color: white;
+}
+
+.onboard-next-btn:hover:not(:disabled), .onboard-submit-btn:hover:not(:disabled) {
+  background: var(--primary-hover);
+}
+
+.onboard-back-btn, .onboard-skip-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+.onboard-back-btn:hover:not(:disabled), .onboard-skip-btn:hover:not(:disabled) {
+  background: var(--surface);
+  border-color: var(--border-hover);
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .onboard-card {
+    padding: 24px 20px;
+    border-radius: 12px;
+    gap: 20px;
+  }
+
+  .onboard-step-title {
+    font-size: 20px;
+  }
+
+  .onboard-footer-actions {
+    flex-direction: column-reverse;
+    gap: 12px;
+    width: 100%;
+  }
+
+  .onboard-footer-actions .btn, 
+  .footer-right-actions, 
+  .footer-right-actions .btn {
+    width: 100%;
+  }
+}

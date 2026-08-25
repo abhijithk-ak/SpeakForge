@@ -1,0 +1,152 @@
+.progress-section {
+  background-color: var(--bg);
+}
+
+.progress-grid {
+  gap: 40px;
+}
+
+.comparison-title {
+  font-size: 20px;
+  margin-bottom: 24px;
+  color: var(--text);
+}
+
+.comparison-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.comparison-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px;
+}
+
+.comp-card-header {
+  display: flex;
+  justify-content: justify;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.comp-label {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.comp-diff {
+  font-size: 12px;
+  font-weight: 700;
+  background-color: rgba(34, 197, 94, 0.1);
+  color: var(--success);
+  padding: 2px 8px;
+  border-radius: 12px;
+  border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.comp-flow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.comp-val {
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.val-initial {
+  color: var(--text-muted);
+}
+
+.val-current {
+  font-size: 32px;
+}
+
+.comp-arrow {
+  color: var(--text-muted);
+  font-size: 18px;
+}
+
+.comp-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* SVG Chart Preview Styles */
+.chart-preview-card {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  justify-content: space-between;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chart-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.chart-tag {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.chart-body {
+  width: 100%;
+  padding: 10px 0;
+}
+
+.trend-svg {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.chart-footer {
+  display: flex;
+  gap: 24px;
+  border-top: 1px solid var(--border);
+  padding-top: 20px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.legend-dot.color-initial {
+  background-color: var(--accent);
+}
+
+.legend-dot.color-current {
+  background-color: var(--primary);
+}
+
+@media (max-width: 1024px) {
+  .progress-grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+}

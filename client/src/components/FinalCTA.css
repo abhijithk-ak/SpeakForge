@@ -1,0 +1,91 @@
+.cta-section {
+  background-color: var(--bg);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+
+.cta-card {
+  border-radius: var(--border-radius-lg);
+  padding: 80px 40px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.cta-title {
+  font-size: clamp(32px, 5vw, 48px);
+  max-width: 800px;
+}
+
+.cta-subtitle {
+  font-size: 18px;
+  color: var(--text-muted);
+  max-width: 600px;
+}
+
+.cta-actions {
+  margin-top: 10px;
+}
+
+.btn-cta-main {
+  padding: 16px 36px;
+  font-size: 17px;
+  font-weight: 600;
+  border-radius: var(--border-radius-sm);
+}
+
+.cta-footer-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.cta-footer-info .divider {
+  opacity: 0.3;
+}
+
+/* Background Glowing Bubble specific to CTA */
+.cta-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  background: var(--primary);
+  filter: blur(140px);
+  opacity: 0.08;
+  pointer-events: none;
+  z-index: 0;
+}
+
+[data-theme="light"] .cta-glow {
+  opacity: 0.04;
+}
+
+@media (max-width: 768px) {
+  .cta-card {
+    padding: 50px 24px;
+    gap: 24px;
+  }
+  
+  .cta-footer-info {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .cta-footer-info .divider {
+    display: none;
+  }
+}

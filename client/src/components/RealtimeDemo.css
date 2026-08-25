@@ -1,0 +1,163 @@
+.demo-section {
+  background-color: var(--bg);
+}
+
+.demo-grid {
+  gap: 50px;
+  align-items: flex-start;
+}
+
+.selector-title {
+  font-size: 20px;
+  margin-bottom: 24px;
+  color: var(--text);
+}
+
+.personality-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.personality-btn {
+  width: 100%;
+  padding: 20px;
+  text-align: left;
+  cursor: pointer;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border);
+  transition: var(--transition-smooth);
+}
+
+.personality-btn:hover {
+  transform: translateX(4px);
+  border-color: var(--border-hover);
+}
+
+.personality-btn.active {
+  background-color: var(--surface);
+  border-color: var(--primary);
+  box-shadow: 0 4px 12px var(--glow);
+  transform: translateX(4px);
+}
+
+.selector-btn-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.coach-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.active-dot {
+  width: 6px;
+  height: 6px;
+  background-color: var(--primary);
+  border-radius: 50%;
+  box-shadow: 0 0 6px var(--primary);
+}
+
+.coach-desc {
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* Console window styles */
+.voice-console-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.voice-console {
+  width: 100%;
+  max-width: 440px;
+  border-radius: var(--border-radius-lg);
+  padding: 32px;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.console-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  transition: var(--transition-smooth);
+}
+
+.status-text {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.console-visualizer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 80px;
+  margin-bottom: 30px;
+}
+
+.console-dialogue {
+  margin-bottom: 30px;
+}
+
+.speaker-tag {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+
+.dialogue-bubble {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  padding: 20px;
+  border-radius: var(--border-radius-md);
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--text);
+  min-height: 80px;
+}
+
+.console-footer {
+  display: flex;
+  justify-content: center;
+}
+
+.mic-button-mock {
+  width: 100%;
+  padding: 14px;
+  text-align: center;
+  border-radius: var(--border-radius-md);
+  background-color: var(--bg-secondary);
+  border: 1px dashed var(--border);
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+@media (max-width: 1024px) {
+  .demo-grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+}

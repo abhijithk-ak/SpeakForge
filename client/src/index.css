@@ -1,0 +1,425 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+/* ==========================================
+   1. DESIGN TOKENS & THEMING
+   ========================================== */
+:root {
+  --font-sans: 'Space Grotesk', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  
+  --border-radius-sm: 8px;
+  --border-radius-md: 14px;
+  --border-radius-lg: 24px;
+  
+  --gradient-brand: linear-gradient(135deg, #7C3AED 0%, #8B5CF6 50%, #06B6D4 100%);
+  --gradient-brand-light: linear-gradient(135deg, #6D28D9 0%, #7C3AED 50%, #0891B2 100%);
+}
+
+/* Default Dark Mode (The Hero Theme) */
+:root, [data-theme="dark"] {
+  --bg: #09090B;
+  --bg-secondary: #111114;
+  --surface: #18181C;
+  --surface-hover: #222227;
+  --border: #27272A;
+  --border-hover: #3f3f46;
+  
+  --primary: #7C3AED;
+  --primary-hover: #8B5CF6;
+  --accent: #06B6D4;
+  
+  --text: #FAFAFA;
+  --text-muted: #A1A1AA;
+  
+  --success: #22C55E;
+  --warning: #F59E0B;
+  --error: #EF4444;
+  
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 8px 16px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 16px 32px rgba(0, 0, 0, 0.6);
+  --glow: rgba(124, 58, 237, 0.12);
+  --bg-glow: radial-gradient(circle at 50% -20%, rgba(124, 58, 237, 0.15), transparent 60%);
+}
+
+/* Light Mode Overrides */
+[data-theme="light"] {
+  --bg: #FAFAFA;
+  --bg-secondary: #F4F4F5;
+  --surface: #FFFFFF;
+  --surface-hover: #F4F4F5;
+  --border: #E4E4E7;
+  --border-hover: #d4d4d8;
+  
+  --primary: #6D28D9;
+  --primary-hover: #7C3AED;
+  --accent: #0891B2;
+  
+  --text: #18181B;
+  --text-muted: #52525B;
+  
+  --success: #16A34A;
+  --warning: #D97706;
+  --error: #DC2626;
+  
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.12);
+  --glow: rgba(109, 40, 217, 0.06);
+  --bg-glow: radial-gradient(circle at 50% -20%, rgba(109, 40, 217, 0.06), transparent 60%);
+}
+
+/* ==========================================
+   2. CSS RESET & BASICS
+   ========================================== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-family: var(--font-sans);
+  scroll-behavior: smooth;
+  background-color: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  overflow-x: hidden;
+  transition: background-color 0.5s ease, color 0.3s ease;
+  background-image: var(--bg-glow);
+  background-attachment: fixed;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  outline: none;
+}
+
+/* Typography Hierarchy */
+h1 {
+  font-size: clamp(40px, 8vw, 72px);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+}
+
+h2 {
+  font-size: clamp(28px, 5vw, 48px);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+h3 {
+  font-size: clamp(20px, 3vw, 24px);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+p {
+  font-size: clamp(15px, 2vw, 17px);
+  line-height: 1.6;
+  color: var(--text-muted);
+}
+
+.gradient-text {
+  background: var(--gradient-brand);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+[data-theme="light"] .gradient-text {
+  background: var(--gradient-brand-light);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ==========================================
+   3. LAYOUT & CONTAINERS
+   ========================================== */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.section {
+  padding: 100px 0;
+  position: relative;
+}
+
+@media (max-width: 768px) {
+  .section {
+    padding: 60px 0;
+  }
+}
+
+/* Grid & Flex Utilities */
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 40px;
+  align-items: center;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+}
+
+@media (max-width: 1024px) {
+  .grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .grid-2, .grid-3 {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+}
+
+/* ==========================================
+   4. UI COMPONENTS
+   ========================================== */
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  font-size: 15px;
+  font-weight: 500;
+  border-radius: var(--border-radius-sm);
+  transition: var(--transition-smooth);
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: #FAFAFA;
+}
+
+.btn-primary:hover {
+  background: var(--primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 0 16px var(--glow);
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+.btn-secondary {
+  border: 1px solid var(--border);
+  color: var(--text);
+  background: transparent;
+}
+
+.btn-secondary:hover {
+  border-color: var(--border-hover);
+  background: var(--bg-secondary);
+  transform: translateY(-1px);
+}
+
+.btn-secondary:active {
+  transform: scale(0.98);
+}
+
+/* Cards */
+.card {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius-md);
+  padding: 32px;
+  transition: var(--transition-smooth);
+  box-shadow: var(--shadow-sm);
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  border-color: var(--primary);
+  box-shadow: var(--shadow-md), 0 0 12px var(--glow);
+}
+
+/* Glass panel */
+.glass-panel {
+  background-color: rgba(24, 24, 28, 0.4);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="light"] .glass-panel {
+  background-color: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* ==========================================
+   5. INTERSECTION OBSERVER REVEALS (SCROLL)
+   ========================================== */
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity;
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-scale {
+  opacity: 0;
+  transform: scale(0.97) translateY(10px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity;
+}
+
+.reveal-scale.visible {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
+
+/* Stagger delays using pure CSS classes for cleaner components */
+.delay-1 { transition-delay: 0.08s; }
+.delay-2 { transition-delay: 0.16s; }
+.delay-3 { transition-delay: 0.24s; }
+.delay-4 { transition-delay: 0.32s; }
+
+/* ==========================================
+   6. ANIMATIONS & MICRO-INTERACTIONS
+   ========================================== */
+
+/* Ambient Slow Glow Background */
+.ambient-glow {
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.08;
+  pointer-events: none;
+  z-index: -1;
+  animation: float-glow 25s infinite alternate ease-in-out;
+}
+
+[data-theme="light"] .ambient-glow {
+  opacity: 0.04;
+}
+
+.glow-purple {
+  background-color: #7C3AED;
+  top: 10%;
+  left: 5%;
+}
+
+.glow-cyan {
+  background-color: #06B6D4;
+  bottom: 20%;
+  right: 5%;
+  animation-delay: -10s;
+}
+
+@keyframes float-glow {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(5vw, 5vh) scale(1.1);
+  }
+  100% {
+    transform: translate(-3vw, 8vh) scale(0.95);
+  }
+}
+
+/* Waveform Pulse Animation */
+.waveform-container {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 60px;
+}
+
+.waveform-bar {
+  width: 4px;
+  height: 10%;
+  background: var(--gradient-brand);
+  border-radius: 2px;
+  animation: pulse-wave 1.4s infinite ease-in-out;
+}
+
+[data-theme="light"] .waveform-bar {
+  background: var(--gradient-brand-light);
+}
+
+/* Set dynamic heights/delays for realism */
+.waveform-bar:nth-child(1) { animation-delay: 0.1s; height: 30%; }
+.waveform-bar:nth-child(2) { animation-delay: 0.3s; height: 50%; }
+.waveform-bar:nth-child(3) { animation-delay: 0.5s; height: 75%; }
+.waveform-bar:nth-child(4) { animation-delay: 0.2s; height: 90%; }
+.waveform-bar:nth-child(5) { animation-delay: 0.4s; height: 60%; }
+.waveform-bar:nth-child(6) { animation-delay: 0.6s; height: 40%; }
+.waveform-bar:nth-child(7) { animation-delay: 0.1s; height: 75%; }
+.waveform-bar:nth-child(8) { animation-delay: 0.3s; height: 90%; }
+.waveform-bar:nth-child(9) { animation-delay: 0.5s; height: 50%; }
+.waveform-bar:nth-child(10) { animation-delay: 0.2s; height: 30%; }
+
+@keyframes pulse-wave {
+  0%, 100% {
+    transform: scaleY(0.3);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+/* Pause the waveform animation if user chooses static */
+.waveform-container.paused .waveform-bar {
+  animation-play-state: paused;
+  transform: scaleY(0.2);
+}
+
+/* ==========================================
+   7. ACCESSIBILITY: REDUCED MOTION SUPPORT
+   ========================================== */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .ambient-glow {
+    animation: none !important;
+  }
+  .waveform-bar {
+    animation: none !important;
+    height: 40% !important;
+  }
+}

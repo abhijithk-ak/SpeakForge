@@ -1,0 +1,323 @@
+/* ==========================================
+   SPEAKFORGE REDESIGNED NAVBAR STYLES
+   ========================================== */
+
+.navbar-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 76px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  background-color: rgba(9, 9, 11, 0.6); /* Low opacity transparent background */
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  box-shadow: none; /* Removed heavy shadows */
+  
+  /* Entrance Animation: cinematic soft slide-down reveal */
+  animation: navbar-slide-down 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+[data-theme="light"] .navbar-header {
+  background-color: rgba(250, 250, 250, 0.7);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* 9. Entrance Animation Keyframes */
+@keyframes navbar-slide-down {
+  0% {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Spacing & Layout Bounds */
+.navbar-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 32px;
+  width: 100%;
+}
+
+/* LEFT: Logo Branding */
+.navbar-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 21px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  z-index: 1010;
+  transition: var(--transition-smooth);
+}
+
+.logo-icon-svg {
+  width: 22px;
+  height: 22px;
+  color: var(--primary);
+}
+
+.navbar-logo:hover {
+  opacity: 0.9;
+}
+
+/* CENTER: Desktop Nav Links */
+.navbar-nav-center {
+  display: flex;
+  align-items: center;
+  gap: 36px;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.nav-link {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-muted);
+  transition: var(--transition-smooth);
+}
+
+.nav-link:hover {
+  color: var(--text);
+}
+
+/* RIGHT: Action Buttons Panel */
+.navbar-actions-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Login (Secondary Transparent Action) */
+.btn-login {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-muted);
+  background-color: transparent;
+  border: 1px solid transparent;
+  padding: 8px 16px;
+  border-radius: var(--border-radius-sm);
+  transition: var(--transition-smooth);
+}
+
+.btn-login:hover {
+  color: var(--text);
+  border-color: var(--border);
+  background-color: var(--bg-secondary);
+}
+
+.btn-login:active {
+  transform: scale(0.98);
+}
+
+/* Start Free (Primary Accent CTA Button) */
+.btn-cta {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 8px 18px;
+  border-radius: 8px; /* Refined compact rounded shape */
+  box-shadow: 0 4px 10px rgba(124, 58, 237, 0.15);
+  transition: var(--transition-smooth);
+}
+
+.btn-cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.3);
+}
+
+/* Theme Switcher Button Style */
+.theme-toggle-icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-smooth);
+}
+
+.theme-toggle-icon-btn:hover {
+  border-color: var(--border-hover);
+  background-color: var(--bg-secondary);
+  color: var(--text);
+  box-shadow: 0 0 10px var(--glow);
+}
+
+.toggle-icon-svg {
+  width: 17px;
+  height: 17px;
+}
+
+/* Hide mobile controls by default */
+.mobile-navbar-controls {
+  display: none;
+}
+
+.mobile-menu-overlay {
+  display: none;
+}
+
+/* ==========================================
+   10. MOBILE RESPONSIVENESS OVERLAY
+   ========================================== */
+
+@media (max-width: 1024px) {
+  /* Hide desktop center nav and right actions panel */
+  .navbar-nav-center,
+  .navbar-actions-right {
+    display: none;
+  }
+
+  /* Display mobile controls bar instead */
+  .mobile-navbar-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 1010;
+  }
+
+  .mobile-menu-toggle-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: var(--border-radius-sm);
+    border: 1px solid var(--border);
+    background-color: transparent;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition-smooth);
+  }
+
+  .mobile-menu-toggle-btn:hover {
+    background-color: var(--bg-secondary);
+  }
+
+  .menu-icon-svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* Mobile Dropdown drawer overlay styling */
+  .mobile-menu-overlay {
+    display: block;
+    position: fixed;
+    top: 76px;
+    left: 0;
+    width: 100%;
+    height: 0;
+    opacity: 0;
+    visibility: hidden;
+    overflow: hidden;
+    background-color: rgba(9, 9, 11, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    transition: height 0.35s cubic-bezier(0.16, 1, 0.3, 1), 
+                opacity 0.3s ease, 
+                visibility 0.3s ease;
+    z-index: 999;
+  }
+
+  [data-theme="light"] .mobile-menu-overlay {
+    background-color: rgba(250, 250, 250, 0.98);
+  }
+
+  .mobile-menu-overlay.open {
+    height: 310px; /* Expands to natural height of links+CTAs drawer */
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .mobile-nav-links {
+    display: flex;
+    flex-direction: column;
+    padding: 32px;
+    gap: 20px;
+  }
+
+  .mobile-nav-link {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 17px;
+    font-weight: 500;
+    color: var(--text-muted);
+    transition: var(--transition-smooth);
+  }
+
+  .mobile-nav-link:hover {
+    color: var(--text);
+    transform: translateX(4px);
+  }
+
+  .mobile-menu-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 8px 0;
+  }
+
+  .mobile-menu-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .mobile-btn-login {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-align: center;
+    padding: 10px 16px;
+    border-radius: var(--border-radius-sm);
+    border: 1px solid var(--border);
+    flex: 1;
+    transition: var(--transition-smooth);
+  }
+
+  .mobile-btn-login:hover {
+    color: var(--text);
+    background-color: var(--bg-secondary);
+  }
+
+  .mobile-btn-cta {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    text-align: center;
+    padding: 10px 20px;
+    flex: 1.5;
+  }
+}
+
+/* ==========================================
+   9. ACCESSIBILITY: REDUCED MOTION SUPPORT
+   ========================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .navbar-header {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  .mobile-menu-overlay {
+    transition: none;
+  }
+}
