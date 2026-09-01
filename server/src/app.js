@@ -19,15 +19,28 @@ const progressRoutes = require('./routes/progressRoutes');
 const usageRoutes = require('./routes/usageRoutes');
 const resumeRoutes = require('./routes/resumeRoutes');
 const realtimeRoutes = require('./routes/realtimeRoutes');
+const apiKeyRoutes   = require('./routes/apiKeyRoutes');
 
 const app = express();
 
 // Security headers
 app.use(helmet());
 
-// CORS — only allow requests from the React client
+// CORS — allow requests from the React client (either Vite port)
+const allowedOrigins = [
+  process.env.CLIENT_URL || 'http://localhost:5173',
+  'http://localhost:5173',
+  'http://localhost:5174',
+];
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  origin: (origin, callback) => {
+    // Allow requests with no origin (curl, Postman) or matching origins
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error(`CORS: origin ${origin} not allowed`));
+    }
+  },
   credentials: true
 }));
 
@@ -55,6 +68,7 @@ app.use('/api/progress', progressRoutes);
 app.use('/api/usage', usageRoutes);
 app.use('/api/resumes', resumeRoutes);
 app.use('/api/realtime', realtimeRoutes);
+app.use('/api/keys',     apiKeyRoutes);
 
 // 404 for unknown routes
 app.use((req, res) => {

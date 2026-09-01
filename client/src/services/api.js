@@ -4,7 +4,9 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:5000/api',
+  // Use a relative URL — Vite proxy forwards /api → http://localhost:5000/api
+  // This way the client works regardless of which port Vite picks.
+  baseURL: '/api',
   headers: { 'Content-Type': 'application/json' }
 });
 

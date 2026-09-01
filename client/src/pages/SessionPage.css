@@ -1,0 +1,370 @@
+/* ─── Session Page — Immersive full-screen voice coaching interface ─── */
+
+.session-page {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  z-index: 100;
+  overflow: hidden;
+}
+
+/* Top Bar */
+.session-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  z-index: 10;
+  flex-shrink: 0;
+}
+
+.session-topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.session-mode-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--primary);
+  background: rgba(124, 58, 237, 0.1);
+  border: 1px solid rgba(124, 58, 237, 0.2);
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+
+.session-timer {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.08em;
+}
+
+.session-end-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  border-radius: var(--border-radius-sm);
+  font-size: 14px;
+  font-weight: 500;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: var(--error);
+  background: rgba(239, 68, 68, 0.06);
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.session-end-btn:hover {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: var(--error);
+}
+
+/* Main Content Area */
+.session-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  padding: 24px;
+  overflow: hidden;
+  position: relative;
+}
+
+/* State orb — the central visual */
+.state-orb-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.state-orb {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Idle state */
+.state-orb.orb-idle {
+  background: radial-gradient(circle, rgba(124, 58, 237, 0.12) 0%, rgba(124, 58, 237, 0.04) 70%);
+  border: 2px solid rgba(124, 58, 237, 0.2);
+  box-shadow: 0 0 0 0 rgba(124, 58, 237, 0);
+}
+
+/* Listening state */
+.state-orb.orb-listening {
+  background: radial-gradient(circle, rgba(124, 58, 237, 0.2) 0%, rgba(124, 58, 237, 0.06) 70%);
+  border: 2px solid rgba(124, 58, 237, 0.4);
+  box-shadow: 0 0 0 12px rgba(124, 58, 237, 0.08), 0 0 40px rgba(124, 58, 237, 0.15);
+  animation: orb-pulse 2s infinite;
+}
+
+/* Processing state */
+.state-orb.orb-processing {
+  background: radial-gradient(circle, rgba(6, 182, 212, 0.2) 0%, rgba(6, 182, 212, 0.06) 70%);
+  border: 2px solid rgba(6, 182, 212, 0.4);
+  box-shadow: 0 0 0 12px rgba(6, 182, 212, 0.06), 0 0 40px rgba(6, 182, 212, 0.1);
+  animation: orb-spin-glow 2s linear infinite;
+}
+
+/* Speaking state */
+.state-orb.orb-speaking {
+  background: radial-gradient(circle, rgba(34, 197, 94, 0.2) 0%, rgba(34, 197, 94, 0.06) 70%);
+  border: 2px solid rgba(34, 197, 94, 0.4);
+  box-shadow: 0 0 0 12px rgba(34, 197, 94, 0.06), 0 0 40px rgba(34, 197, 94, 0.1);
+  animation: orb-pulse-fast 1s infinite;
+}
+
+@keyframes orb-pulse {
+  0%, 100% { box-shadow: 0 0 0 12px rgba(124, 58, 237, 0.08), 0 0 40px rgba(124, 58, 237, 0.15); }
+  50%       { box-shadow: 0 0 0 20px rgba(124, 58, 237, 0.04), 0 0 60px rgba(124, 58, 237, 0.2); }
+}
+
+@keyframes orb-pulse-fast {
+  0%, 100% { box-shadow: 0 0 0 8px rgba(34, 197, 94, 0.08), 0 0 30px rgba(34, 197, 94, 0.12); }
+  50%       { box-shadow: 0 0 0 16px rgba(34, 197, 94, 0.04), 0 0 50px rgba(34, 197, 94, 0.18); }
+}
+
+@keyframes orb-spin-glow {
+  0%   { border-color: rgba(6, 182, 212, 0.4); }
+  50%  { border-color: rgba(124, 58, 237, 0.4); }
+  100% { border-color: rgba(6, 182, 212, 0.4); }
+}
+
+.orb-icon {
+  color: var(--primary);
+  transition: color 0.4s;
+}
+
+.orb-listening .orb-icon { color: var(--primary); }
+.orb-processing .orb-icon { color: var(--accent); }
+.orb-speaking .orb-icon { color: var(--success); }
+
+.state-label {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  transition: color 0.3s;
+}
+
+.orb-listening  ~ .state-label { color: var(--primary); }
+.orb-processing ~ .state-label { color: var(--accent); }
+.orb-speaking   ~ .state-label { color: var(--success); }
+
+/* Transcript area */
+.transcript-area {
+  width: 100%;
+  max-width: 680px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 260px;
+  overflow-y: auto;
+  padding: 4px 0;
+  scroll-behavior: smooth;
+}
+
+.transcript-area::-webkit-scrollbar {
+  width: 4px;
+}
+
+.transcript-area::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.transcript-area::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 2px;
+}
+
+.transcript-bubble {
+  max-width: 75%;
+  padding: 12px 16px;
+  border-radius: 16px;
+  font-size: 14px;
+  line-height: 1.6;
+  animation: bubble-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes bubble-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.bubble-user {
+  background: rgba(124, 58, 237, 0.12);
+  border: 1px solid rgba(124, 58, 237, 0.2);
+  color: var(--text);
+  align-self: flex-end;
+  border-bottom-right-radius: 4px;
+}
+
+.bubble-ai {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  align-self: flex-start;
+  border-bottom-left-radius: 4px;
+}
+
+.bubble-speaker {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.55;
+  margin-bottom: 4px;
+}
+
+/* Live transcript (current speech being captured) */
+.live-transcript {
+  width: 100%;
+  max-width: 680px;
+  min-height: 48px;
+  padding: 12px 16px;
+  background: rgba(124, 58, 237, 0.06);
+  border: 1px dashed rgba(124, 58, 237, 0.3);
+  border-radius: 12px;
+  font-size: 15px;
+  color: var(--text-muted);
+  font-style: italic;
+  transition: all 0.3s;
+}
+
+.live-transcript.has-content {
+  color: var(--text);
+  font-style: normal;
+  border-color: rgba(124, 58, 237, 0.5);
+}
+
+/* Mic button */
+.session-mic-btn {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--gradient-brand);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 20px rgba(124, 58, 237, 0.3);
+  color: white;
+  flex-shrink: 0;
+}
+
+.session-mic-btn:hover:not(:disabled) {
+  transform: scale(1.08);
+  box-shadow: 0 8px 28px rgba(124, 58, 237, 0.4);
+}
+
+.session-mic-btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.session-mic-btn.mic-active {
+  background: linear-gradient(135deg, #EF4444, #DC2626);
+  box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4);
+  animation: mic-pulse 1.5s infinite;
+}
+
+@keyframes mic-pulse {
+  0%, 100% { box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4); }
+  50%       { box-shadow: 0 4px 32px rgba(239, 68, 68, 0.6); }
+}
+
+.session-mic-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Controls row */
+.session-controls {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 16px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.mic-hint {
+  flex: 1;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* Browser compat notice */
+.compat-notice {
+  padding: 12px 20px;
+  background: rgba(245, 158, 11, 0.08);
+  border-top: 1px solid rgba(245, 158, 11, 0.2);
+  color: var(--warning);
+  font-size: 13px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+/* Loading / error overlay */
+.session-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  background: var(--bg);
+  z-index: 20;
+  text-align: center;
+  padding: 40px;
+}
+
+.session-overlay-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.session-overlay-desc {
+  font-size: 14px;
+  color: var(--text-muted);
+  max-width: 420px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .state-orb { animation: none !important; }
+  .session-mic-btn { animation: none !important; }
+  .transcript-bubble { animation: none !important; }
+}
+
+@media (max-width: 640px) {
+  .session-topbar { padding: 12px 16px; }
+  .session-main   { padding: 16px; gap: 20px; }
+  .transcript-area { max-height: 200px; }
+  .state-orb { width: 90px; height: 90px; }
+}

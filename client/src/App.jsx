@@ -76,13 +76,19 @@ const App = () => {
             <Route path="/practice/interview" element={<InterviewSetupPage />} />
             <Route path="/practice/speech" element={<SpeechSetupPage />} />
             <Route path="/practice/client" element={<ClientSetupPage />} />
-            <Route path="/session/:id" element={<SessionPage />} />
             <Route path="/results/:id" element={<ResultsPage />} />
             <Route path="/progress" element={<ProgressPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/usage" element={<UsagePage />} />
           </Route>
+
+          {/* Session — fullscreen, no sidebar */}
+          <Route path="/session/:id" element={
+            <ProtectedRoute>
+              <SessionPage />
+            </ProtectedRoute>
+          } />
 
           {/* Catch-all */}
           <Route path="*" element={<Navigate to="/" replace />} />

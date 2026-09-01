@@ -1,12 +1,11 @@
 const express = require('express');
-const router = express.Router();
+const router  = express.Router();
+const authenticate = require('../middleware/authMiddleware');
+const { createEvaluation, getEvaluation } = require('../controllers/evaluationController');
 
-// TODO: implement evaluation routes
-router.all('*', (req, res) => {
-  res.status(501).json({
-    success: false,
-    error: { code: 'NOT_IMPLEMENTED', message: 'This endpoint is not yet implemented' }
-  });
-});
+router.use(authenticate);
+
+router.post('/:sessionId',  createEvaluation);
+router.get('/:sessionId',   getEvaluation);
 
 module.exports = router;

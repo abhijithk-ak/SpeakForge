@@ -1,12 +1,22 @@
 const express = require('express');
-const router = express.Router();
+const router  = express.Router();
+const authenticate = require('../middleware/authMiddleware');
+const {
+  createSession,
+  getSessions,
+  getSession,
+  startSession,
+  processTurn,
+  endSession
+} = require('../controllers/sessionController');
 
-// TODO: implement session routes
-router.all('*', (req, res) => {
-  res.status(501).json({
-    success: false,
-    error: { code: 'NOT_IMPLEMENTED', message: 'This endpoint is not yet implemented' }
-  });
-});
+router.use(authenticate);
+
+router.post('/',               createSession);
+router.get('/',                getSessions);
+router.get('/:id',             getSession);
+router.post('/:id/start',      startSession);
+router.post('/:id/turn',       processTurn);
+router.post('/:id/end',        endSession);
 
 module.exports = router;

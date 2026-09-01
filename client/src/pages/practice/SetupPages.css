@@ -1,0 +1,245 @@
+/* Shared CSS for all 3 Practice Setup Pages */
+
+.setup-page {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 32px 24px 60px;
+}
+
+.setup-header {
+  margin-bottom: 32px;
+}
+
+.setup-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 6px 0;
+  margin-bottom: 20px;
+  border: none;
+  background: none;
+  transition: color 0.2s;
+}
+
+.setup-back-btn:hover {
+  color: var(--text);
+}
+
+.setup-mode-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--primary);
+  background: rgba(124, 58, 237, 0.1);
+  border: 1px solid rgba(124, 58, 237, 0.2);
+  padding: 5px 14px;
+  border-radius: 20px;
+  margin-bottom: 14px;
+}
+
+.setup-title {
+  font-size: clamp(26px, 5vw, 36px);
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 8px;
+  letter-spacing: -0.02em;
+}
+
+.setup-subtitle {
+  font-size: 15px;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* Form Card */
+.setup-form-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius-lg);
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  box-shadow: var(--shadow-sm);
+}
+
+.setup-field-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.setup-field-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: 0.02em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.setup-field-label svg {
+  color: var(--primary);
+}
+
+/* Option Grid — pill selector */
+.options-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.option-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 14px 12px;
+  border-radius: var(--border-radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-secondary);
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  min-height: 64px;
+}
+
+.option-pill:hover {
+  border-color: var(--primary);
+  color: var(--text);
+  background: rgba(124, 58, 237, 0.05);
+}
+
+.option-pill.selected {
+  border-color: var(--primary);
+  background: rgba(124, 58, 237, 0.1);
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.option-pill-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+/* Text input field */
+.setup-text-input {
+  width: 100%;
+  padding: 12px 16px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius-sm);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.setup-text-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+}
+
+.setup-text-input::placeholder {
+  color: var(--text-muted);
+}
+
+/* No API key warning */
+.no-key-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  border-radius: var(--border-radius-sm);
+  color: var(--warning);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.no-key-warning a {
+  color: var(--warning);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Start button */
+.setup-start-btn {
+  width: 100%;
+  padding: 16px;
+  font-size: 16px;
+  font-weight: 600;
+  gap: 10px;
+  border-radius: var(--border-radius-md);
+  background: var(--gradient-brand);
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  letter-spacing: 0.01em;
+}
+
+.setup-start-btn:hover:not(:disabled) {
+  opacity: 0.92;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(124, 58, 237, 0.3);
+}
+
+.setup-start-btn:active:not(:disabled) {
+  transform: scale(0.99);
+}
+
+.setup-start-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Provider selector in setup */
+.provider-selector {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.provider-select-pill {
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--bg-secondary);
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.provider-select-pill.selected {
+  border-color: var(--primary);
+  background: rgba(124, 58, 237, 0.1);
+  color: var(--primary);
+  font-weight: 600;
+}
+
+@media (max-width: 640px) {
+  .setup-form-card {
+    padding: 24px 20px;
+  }
+  .options-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
