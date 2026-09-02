@@ -26,7 +26,8 @@ const update = async (userId, data) => {
   const allowed = [
     'full_name', 'avatar_url', 'role', 'experience_level',
     'primary_goal', 'employment_status', 'target_role',
-    'industry', 'preferred_coach'
+    'industry', 'preferred_coach', 'fields', 'goals',
+    'experience', 'onboarding_complete'
   ];
 
   for (const key of allowed) {

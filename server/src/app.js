@@ -20,6 +20,9 @@ const usageRoutes = require('./routes/usageRoutes');
 const resumeRoutes = require('./routes/resumeRoutes');
 const realtimeRoutes = require('./routes/realtimeRoutes');
 const apiKeyRoutes   = require('./routes/apiKeyRoutes');
+const modelRoutes    = require('./routes/modelRoutes');
+const settingsRoutes = require('./routes/settingsRoutes');
+const topicRoutes    = require('./routes/topicRoutes');
 
 const app = express();
 
@@ -69,6 +72,9 @@ app.use('/api/usage', usageRoutes);
 app.use('/api/resumes', resumeRoutes);
 app.use('/api/realtime', realtimeRoutes);
 app.use('/api/keys',     apiKeyRoutes);
+app.use('/api/models',   modelRoutes);
+app.use('/api/settings', settingsRoutes);
+app.use('/api/topics',   topicRoutes);
 
 // 404 for unknown routes
 app.use((req, res) => {

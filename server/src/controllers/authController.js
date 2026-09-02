@@ -70,4 +70,43 @@ const me = async (req, res, next) => {
   }
 };
 
-module.exports = { register, login, me, registerValidation, loginValidation };
+const forgotPassword = async (req, res, next) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return sendError(res, 'VALIDATION_ERROR', errors.array()[0].msg, 400);
+    }
+    const { email } = req.body;
+    const result = await authService.forgotPassword(email);
+    return sendSuccess(res, result);
+  } catch (err) {
+    next(err);
+  }
+};
+
+const resetPassword = async (req, res, next) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return sendError(res, 'VALIDATION_ERROR', errors.array()[0].msg, 400);
+    }
+    const { email, resetCode, newPassword } = req.body;
+    const result = await authService.resetPassword(email, resetCode, newPassword);
+    return sendSuccess(res, result);
+  } catch (err) {
+    if (err.code === 'INVALID_RESET') {
+      return sendError(res, 'INVALID_RESET', err.message, 400);
+    }
+    next(err);
+  }
+};
+
+module.exports = {
+  register,
+  login,
+  me,
+  forgotPassword,
+  resetPassword,
+  registerValidation,
+  loginValidation
+};

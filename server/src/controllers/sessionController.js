@@ -1,7 +1,45 @@
 const sessionRepo = require('../db/repositories/sessionRepository');
 const apiKeyRepo  = require('../db/repositories/apiKeyRepository');
+const settingsRepo = require('../db/repositories/settingsRepository');
+const profileRepo = require('../db/repositories/profileRepository');
 const { decrypt } = require('../utils/encryption');
-const { generateResponse, buildSystemPrompt } = require('../services/llmService');
+const { chat, streamChat, buildSystemPrompt, PROVIDERS } = require('../services/llmService');
+
+/**
+ * Helper to resolve provider credentials (apiKey or local host/port)
+ */
+async function resolveProviderCredentials(userId, preferredProvider, requestedModel) {
+  // First check user_settings
+  const settings = await settingsRepo.getWithEncryptedKey(userId);
+
+  const provider = preferredProvider || settings?.ai_provider || 'groq';
+  const model = requestedModel || settings?.ai_model || PROVIDERS[provider]?.defaultModel;
+  const ollamaHost = settings?.ollama_host || 'localhost';
+  const ollamaPort = settings?.ollama_port || 11434;
+
+  let apiKey = null;
+
+  if (PROVIDERS[provider]?.requiresKey) {
+    // Check if key is in user_settings
+    if (settings?.encrypted_api_key && settings?.ai_provider === provider) {
+      try {
+        apiKey = decrypt(settings.encrypted_api_key);
+      } catch (e) {}
+    }
+
+    // Fallback to user_api_keys table
+    if (!apiKey) {
+      const keyRow = await apiKeyRepo.findByProvider(userId, provider);
+      if (keyRow?.api_key_enc) {
+        try {
+          apiKey = decrypt(keyRow.api_key_enc);
+        } catch (e) {}
+      }
+    }
+  }
+
+  return { provider, model, apiKey, ollamaHost, ollamaPort };
+}
 
 /**
  * POST /api/sessions
@@ -30,7 +68,6 @@ const createSession = async (req, res, next) => {
 
 /**
  * GET /api/sessions
- * Get all sessions for the authenticated user.
  */
 const getSessions = async (req, res, next) => {
   try {
@@ -45,7 +82,6 @@ const getSessions = async (req, res, next) => {
 
 /**
  * GET /api/sessions/:id
- * Get a single session with its turns.
  */
 const getSession = async (req, res, next) => {
   try {
@@ -62,7 +98,7 @@ const getSession = async (req, res, next) => {
 
 /**
  * POST /api/sessions/:id/start
- * Mark the session as started — returns the opening message from the AI coach.
+ * Starts session and returns initial coach greeting
  */
 const startSession = async (req, res, next) => {
   try {
@@ -71,23 +107,20 @@ const startSession = async (req, res, next) => {
       return res.status(404).json({ success: false, error: { code: 'NOT_FOUND' } });
     }
 
-    // Get the user's preferred/configured LLM provider
-    const { provider, topic, scenario, client_personality } = req.body;
-    const safeProvider = provider || 'groq';
+    const { provider: reqProvider, model: reqModel, topic, scenario, client_personality } = req.body;
+    const { provider, model, apiKey, ollamaHost, ollamaPort } = await resolveProviderCredentials(req.user.id, reqProvider, reqModel);
 
-    const keyRow = await apiKeyRepo.findByProvider(req.user.id, safeProvider);
-    if (!keyRow) {
+    if (PROVIDERS[provider]?.requiresKey && !apiKey) {
       return res.status(400).json({
         success: false,
         error: {
-          code:    'NO_API_KEY',
-          message: `No ${safeProvider} API key configured. Go to Settings → AI Provider.`
+          code: 'NO_API_KEY',
+          message: `No ${PROVIDERS[provider]?.name || provider} API key configured. Configure your key in Settings.`
         }
       });
     }
 
-    const apiKey = decrypt(keyRow.api_key_enc);
-    const selectedModel = keyRow.selected_model;
+    const userProfile = (await profileRepo.findByUserId(req.user.id)) || {};
 
     const systemPrompt = buildSystemPrompt(session.mode, {
       role:              session.role,
@@ -96,19 +129,17 @@ const startSession = async (req, res, next) => {
       topic,
       scenario,
       client_personality
-    });
+    }, userProfile);
 
-    // Initiate greeting from the AI — prompt must end with a user role for providers like Groq
+    // Initial greeting prompt
     const messages = [
       { role: 'system', content: systemPrompt },
-      { role: 'user', content: 'Hello! I am ready for our session. Please greet me and start.' }
+      { role: 'user', content: 'Hello! I am ready for our session. Please greet me warmly and start.' }
     ];
-    const opening = await generateResponse(safeProvider, apiKey, messages, selectedModel);
 
-    // Mark session as started
+    const opening = await chat(provider, apiKey, model, messages, ollamaHost, ollamaPort);
+
     await sessionRepo.start(session.id, req.user.id);
-
-    // Save the opening as turn 0 (assistant only)
     await sessionRepo.addTurn(session.id, 0, '', opening);
 
     res.json({
@@ -116,8 +147,8 @@ const startSession = async (req, res, next) => {
       data: {
         sessionId: session.id,
         opening,
-        provider: safeProvider,
-        model: selectedModel
+        provider,
+        model
       }
     });
   } catch (err) {
@@ -127,8 +158,7 @@ const startSession = async (req, res, next) => {
 
 /**
  * POST /api/sessions/:id/turn
- * Process one conversation turn: user text → AI response.
- * Body: { transcript: string, provider: string, turnNumber: number, topic?, scenario?, client_personality? }
+ * Standard non-streaming turn
  */
 const processTurn = async (req, res, next) => {
   try {
@@ -137,7 +167,7 @@ const processTurn = async (req, res, next) => {
       return res.status(404).json({ success: false, error: { code: 'NOT_FOUND' } });
     }
 
-    const { transcript, provider, turnNumber, topic, scenario, client_personality } = req.body;
+    const { transcript, messages: clientHistory, provider: reqProvider, model: reqModel, turnNumber, topic, scenario, client_personality } = req.body;
 
     if (!transcript || !transcript.trim()) {
       return res.status(400).json({
@@ -146,19 +176,17 @@ const processTurn = async (req, res, next) => {
       });
     }
 
-    const safeProvider = provider || 'groq';
-    const keyRow = await apiKeyRepo.findByProvider(req.user.id, safeProvider);
-    if (!keyRow) {
+    const { provider, model, apiKey, ollamaHost, ollamaPort } = await resolveProviderCredentials(req.user.id, reqProvider, reqModel);
+
+    if (PROVIDERS[provider]?.requiresKey && !apiKey) {
       return res.status(400).json({
         success: false,
-        error: { code: 'NO_API_KEY', message: `No ${safeProvider} API key configured.` }
+        error: { code: 'NO_API_KEY', message: `No ${provider} API key configured.` }
       });
     }
 
-    const apiKey = decrypt(keyRow.api_key_enc);
-    const selectedModel = keyRow.selected_model;
+    const userProfile = (await profileRepo.findByUserId(req.user.id)) || {};
 
-    // Build full conversation history for context
     const systemPrompt = buildSystemPrompt(session.mode, {
       role:              session.role,
       difficulty:        session.difficulty,
@@ -166,30 +194,136 @@ const processTurn = async (req, res, next) => {
       topic,
       scenario,
       client_personality
-    });
+    }, userProfile);
 
-    const existingTurns = await sessionRepo.getTurns(session.id);
-    const messages = [
-      { role: 'system', content: systemPrompt },
-      ...existingTurns
-        .filter(t => t.content)
-        .map(t => ({
-          role:    t.speaker === 'user' ? 'user' : 'assistant',
-          content: t.content
-        })),
-      { role: 'user', content: transcript.trim() }
-    ];
+    // Build messages array: prioritize full clientHistory if supplied (BUG 3 fix)
+    let messages = [];
+    if (Array.isArray(clientHistory) && clientHistory.length > 0) {
+      messages = [
+        { role: 'system', content: systemPrompt },
+        ...clientHistory.filter(m => m.role !== 'system')
+      ];
+    } else {
+      const existingTurns = await sessionRepo.getTurns(session.id);
+      messages = [
+        { role: 'system', content: systemPrompt },
+        ...existingTurns
+          .filter(t => t.content)
+          .map(t => ({
+            role:    (t.speaker === 'user' || t.role === 'user') ? 'user' : 'assistant',
+            content: t.content
+          })),
+        { role: 'user', content: transcript.trim() }
+      ];
+    }
 
-    const aiResponse = await generateResponse(safeProvider, apiKey, messages, selectedModel);
+    const aiResponse = await chat(provider, apiKey, model, messages, ollamaHost, ollamaPort);
 
-    // Persist the turn
-    await sessionRepo.addTurn(session.id, turnNumber || existingTurns.length + 1, transcript.trim(), aiResponse);
+    // Use provided turnNumber, or compute safe sequential integer from existing turns
+    const safeTurnNumber = (turnNumber && Number.isInteger(turnNumber) && turnNumber < 2147483647)
+      ? turnNumber
+      : ((await sessionRepo.getTurns(session.id)).length + 1);
+
+    await sessionRepo.addTurn(session.id, safeTurnNumber, transcript.trim(), aiResponse);
 
     res.json({
       success: true,
       data: {
         response:   aiResponse,
-        turnNumber: turnNumber || existingTurns.length + 1
+        turnNumber: safeTurnNumber
+      }
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
+ * POST /api/sessions/:id/stream
+ * Streaming SSE endpoint for real-time sentence-chunked voice output
+ */
+const streamTurn = async (req, res, next) => {
+  try {
+    const session = await sessionRepo.findById(req.params.id, req.user.id);
+    if (!session) {
+      return res.status(404).json({ success: false, error: { code: 'NOT_FOUND' } });
+    }
+
+    const { transcript, messages: clientHistory, provider: reqProvider, model: reqModel, turnNumber, topic, scenario, client_personality } = req.body;
+
+    if (!transcript || !transcript.trim()) {
+      return res.status(400).json({ success: false, error: { code: 'EMPTY_TRANSCRIPT' } });
+    }
+
+    const { provider, model, apiKey, ollamaHost, ollamaPort } = await resolveProviderCredentials(req.user.id, reqProvider, reqModel);
+
+    if (PROVIDERS[provider]?.requiresKey && !apiKey) {
+      return res.status(400).json({ success: false, error: { code: 'NO_API_KEY' } });
+    }
+
+    const userProfile = (await profileRepo.findByUserId(req.user.id)) || {};
+
+    const systemPrompt = buildSystemPrompt(session.mode, {
+      role:              session.role,
+      difficulty:        session.difficulty,
+      coach_personality: session.coach_personality,
+      topic,
+      scenario,
+      client_personality
+    }, userProfile);
+
+    let messages = [];
+    if (Array.isArray(clientHistory) && clientHistory.length > 0) {
+      messages = [
+        { role: 'system', content: systemPrompt },
+        ...clientHistory.filter(m => m.role !== 'system')
+      ];
+    } else {
+      const existingTurns = await sessionRepo.getTurns(session.id);
+      messages = [
+        { role: 'system', content: systemPrompt },
+        ...existingTurns
+          .filter(t => t.content)
+          .map(t => ({
+            role:    (t.speaker === 'user' || t.role === 'user') ? 'user' : 'assistant',
+            content: t.content
+          })),
+        { role: 'user', content: transcript.trim() }
+      ];
+    }
+
+    // Set SSE headers
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.flushHeaders?.();
+
+    await streamChat({
+      provider,
+      apiKey,
+      model,
+      messages,
+      customHost: ollamaHost,
+      customPort: ollamaPort,
+      onSentenceChunk: (sentence) => {
+        res.write(`data: ${JSON.stringify({ type: 'sentence', text: sentence })}\n\n`);
+      },
+      onDone: async (fullText) => {
+        try {
+          const safeTurnNum = (turnNumber && Number.isInteger(turnNumber) && turnNumber < 2147483647)
+            ? turnNumber
+            : ((await sessionRepo.getTurns(session.id)).length + 1);
+          await sessionRepo.addTurn(session.id, safeTurnNum, transcript.trim(), fullText);
+        } catch (dbErr) {
+          console.error('Failed to save turn from stream:', dbErr.message);
+        }
+        res.write(`data: ${JSON.stringify({ type: 'done', fullText })}\n\n`);
+        res.end();
+      },
+      onError: (err) => {
+        console.error('Streaming turn error:', err.message);
+        res.write(`data: ${JSON.stringify({ type: 'error', error: err.message })}\n\n`);
+        res.end();
       }
     });
   } catch (err) {
@@ -199,7 +333,6 @@ const processTurn = async (req, res, next) => {
 
 /**
  * POST /api/sessions/:id/end
- * End the session. Returns session summary.
  */
 const endSession = async (req, res, next) => {
   try {
@@ -213,4 +346,12 @@ const endSession = async (req, res, next) => {
   }
 };
 
-module.exports = { createSession, getSessions, getSession, startSession, processTurn, endSession };
+module.exports = {
+  createSession,
+  getSessions,
+  getSession,
+  startSession,
+  processTurn,
+  streamTurn,
+  endSession
+};

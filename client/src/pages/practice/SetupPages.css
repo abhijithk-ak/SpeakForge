@@ -73,7 +73,7 @@
 .setup-field-section {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 .setup-field-label {
@@ -88,6 +88,137 @@
 
 .setup-field-label svg {
   color: var(--primary);
+}
+
+/* Domain Chips Grid */
+.domain-chips-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.domain-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.domain-chip:hover {
+  border-color: var(--primary);
+  color: var(--text);
+  background: var(--surface-hover);
+}
+
+.domain-chip.selected {
+  border-color: var(--primary);
+  background: rgba(124, 58, 237, 0.1);
+  color: var(--primary);
+  font-weight: 600;
+}
+
+/* Slot Machine Topic Display Box */
+.topic-display-box {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  text-align: center;
+}
+
+.slot-machine-frame {
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+}
+
+.topic-text-active {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.5;
+  margin: 0;
+  max-width: 520px;
+}
+
+/* Slot Machine Animation */
+.topic-reel-container {
+  display: flex;
+  gap: 16px;
+  height: 60px;
+  overflow: hidden;
+}
+
+.topic-reel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+@keyframes slot-scroll-1 {
+  0%   { transform: translateY(0); }
+  100% { transform: translateY(-240px); }
+}
+
+@keyframes slot-scroll-2 {
+  0%   { transform: translateY(0); }
+  100% { transform: translateY(-280px); }
+}
+
+.topic-reel.reel-1 {
+  animation: slot-scroll-1 1.5s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+}
+
+.topic-reel.reel-2 {
+  animation: slot-scroll-2 1.5s 0.2s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+}
+
+.reel-item {
+  height: 30px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.random-spin-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toggle-custom-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--primary);
+  cursor: pointer;
+  margin-left: auto;
+}
+
+.toggle-custom-link:hover {
+  text-decoration: underline;
 }
 
 /* Option Grid — pill selector */
@@ -106,14 +237,14 @@
   padding: 14px 12px;
   border-radius: var(--border-radius-sm);
   border: 1px solid var(--border);
-  background: var(--bg-secondary);
+  background: var(--bg);
   cursor: pointer;
   transition: var(--transition-smooth);
   gap: 6px;
   font-size: 13px;
   font-weight: 500;
   color: var(--text-muted);
-  min-height: 64px;
+  min-height: 52px;
 }
 
 .option-pill:hover {
@@ -129,16 +260,11 @@
   font-weight: 600;
 }
 
-.option-pill-icon {
-  font-size: 18px;
-  line-height: 1;
-}
-
 /* Text input field */
 .setup-text-input {
   width: 100%;
   padding: 12px 16px;
-  background: var(--bg-secondary);
+  background: var(--bg);
   border: 1px solid var(--border);
   border-radius: var(--border-radius-sm);
   color: var(--text);
@@ -154,30 +280,6 @@
   box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
 }
 
-.setup-text-input::placeholder {
-  color: var(--text-muted);
-}
-
-/* No API key warning */
-.no-key-warning {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 14px 16px;
-  background: rgba(245, 158, 11, 0.08);
-  border: 1px solid rgba(245, 158, 11, 0.2);
-  border-radius: var(--border-radius-sm);
-  color: var(--warning);
-  font-size: 13px;
-  line-height: 1.5;
-}
-
-.no-key-warning a {
-  color: var(--warning);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-
 /* Start button */
 .setup-start-btn {
   width: 100%;
@@ -191,7 +293,6 @@
   border: none;
   cursor: pointer;
   transition: var(--transition-smooth);
-  letter-spacing: 0.01em;
 }
 
 .setup-start-btn:hover:not(:disabled) {
@@ -200,44 +301,17 @@
   box-shadow: 0 8px 24px rgba(124, 58, 237, 0.3);
 }
 
-.setup-start-btn:active:not(:disabled) {
-  transform: scale(0.99);
-}
-
 .setup-start-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-/* Provider selector in setup */
-.provider-selector {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.provider-select-pill {
-  padding: 8px 16px;
-  border-radius: 20px;
-  border: 1px solid var(--border);
-  background: var(--bg-secondary);
-  color: var(--text-muted);
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: var(--transition-smooth);
-}
-
-.provider-select-pill.selected {
-  border-color: var(--primary);
-  background: rgba(124, 58, 237, 0.1);
-  color: var(--primary);
-  font-weight: 600;
-}
-
 @media (max-width: 640px) {
   .setup-form-card {
     padding: 24px 20px;
+  }
+  .domain-chips-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
   .options-grid {
     grid-template-columns: repeat(2, 1fr);

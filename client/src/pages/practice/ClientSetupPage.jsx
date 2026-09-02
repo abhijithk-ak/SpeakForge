@@ -1,30 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Users, Zap, Loader2, AlertTriangle } from 'lucide-react';
+import {
+  ArrowLeft, Users, Zap, Loader2, AlertTriangle,
+  Clock, FileText, Bug, AlertOctagon, Smile, Gauge, AlertCircle, Briefcase, HeartHandshake, BookOpen
+} from 'lucide-react';
 import { createSession } from '../../services/sessionService';
-import { getKeys } from '../../services/apiKeyService';
+import api from '../../services/api';
 import './SetupPages.css';
 
 const SCENARIOS = [
-  { value: 'deadline',  label: 'Missed Deadline',      icon: '⏰', desc: 'Explaining a project delay to a client' },
-  { value: 'feature',   label: 'Scope Creep',          icon: '📋', desc: 'Client requesting out-of-scope features' },
-  { value: 'bug',       label: 'Critical Bug',         icon: '🐛', desc: 'Production bug affecting the client' },
-  { value: 'outage',    label: 'Service Outage',        icon: '🚨', desc: 'System is down — client on the line' },
+  { value: 'deadline',  label: 'Missed Deadline',      icon: Clock, desc: 'Explaining a project delay to an expectant client' },
+  { value: 'feature',   label: 'Scope Creep',          icon: FileText, desc: 'Client requesting out-of-scope urgent features' },
+  { value: 'bug',       label: 'Critical Bug',         icon: Bug, desc: 'Major production issue impacting the client team' },
+  { value: 'outage',    label: 'Service Outage',        icon: AlertOctagon, desc: 'System is down and client is demanding resolution' },
 ];
 
 const CLIENT_PERSONALITIES = [
-  { value: 'calm',      label: 'Calm',       icon: '😌', desc: 'Reasonable, professional' },
-  { value: 'demanding', label: 'Demanding',  icon: '😤', desc: 'High expectations, impatient' },
-  { value: 'frustrated',label: 'Frustrated', icon: '😠', desc: 'Upset, looking for accountability' },
+  { value: 'calm',      label: 'Calm',       icon: Smile, desc: 'Reasonable, professional' },
+  { value: 'demanding', label: 'Demanding',  icon: Gauge, desc: 'High expectations, urgent' },
+  { value: 'frustrated',label: 'Frustrated', icon: AlertCircle, desc: 'Upset, demanding immediate accountability' },
 ];
 
 const COACHES = [
-  { value: 'professional', label: 'Professional', icon: '💼' },
-  { value: 'friendly',     label: 'Friendly',     icon: '😊' },
-  { value: 'mentor',       label: 'Mentor',       icon: '📚' },
+  { value: 'professional', label: 'Professional', icon: Briefcase },
+  { value: 'friendly',     label: 'Supportive',   icon: HeartHandshake },
+  { value: 'mentor',       label: 'Mentor',       icon: BookOpen },
 ];
-
-const PROVIDERS = ['groq', 'gemini', 'openai'];
 
 export default function ClientSetupPage() {
   const navigate = useNavigate();
@@ -32,27 +33,21 @@ export default function ClientSetupPage() {
   const [scenario,           setScenario]    = useState('deadline');
   const [clientPersonality,  setClientPers]  = useState('demanding');
   const [coach,              setCoach]       = useState('professional');
-  const [provider,           setProvider]    = useState('groq');
-  const [configuredKeys,     setConfigured]  = useState([]);
+  const [userSettings,       setUserSettings] = useState(null);
   const [loading,            setLoading]     = useState(false);
-  const [keysLoading,        setKeysLoading] = useState(true);
 
   useEffect(() => {
-    getKeys()
-      .then(keys => {
-        setConfigured(keys.map(k => k.provider));
-        const first = PROVIDERS.find(p => keys.some(k => k.provider === p));
-        if (first) setProvider(first);
-      })
-      .catch(() => {})
-      .finally(() => setKeysLoading(false));
+    api.get('/settings').then(res => {
+      setUserSettings(res.data?.data || {});
+    }).catch(() => {});
   }, []);
 
-  const hasKey = configuredKeys.includes(provider);
-
   const handleStart = async () => {
-    if (!hasKey || loading) return;
+    if (loading) return;
     setLoading(true);
+
+    const provider = userSettings?.ai_provider || 'groq';
+
     try {
       const session = await createSession({
         mode:              'client',
@@ -60,6 +55,7 @@ export default function ClientSetupPage() {
         coach_personality: coach,
         difficulty:        'intermediate'
       });
+
       navigate(`/session/${session.id}`, {
         state: { provider, topic: null, scenario, client_personality: clientPersonality }
       });
@@ -80,7 +76,7 @@ export default function ClientSetupPage() {
         </div>
         <h1 className="setup-title">Configure Your Scenario</h1>
         <p className="setup-subtitle">
-          Practice high-stakes client conversations with an AI that plays both roles.
+          Practice high-stakes stakeholder and client conversations with adaptive roleplay.
         </p>
       </div>
 
@@ -90,96 +86,76 @@ export default function ClientSetupPage() {
         <div className="setup-field-section">
           <label className="setup-field-label">Scenario</label>
           <div className="options-grid" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
-            {SCENARIOS.map(s => (
-              <button
-                key={s.value}
-                className={`option-pill ${scenario === s.value ? 'selected' : ''}`}
-                onClick={() => setScenario(s.value)}
-                type="button"
-                style={{ flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left', padding: '14px 16px' }}
-              >
-                <span style={{ fontSize: '20px', marginBottom: '4px' }}>{s.icon}</span>
-                <span style={{ fontWeight: 600, fontSize: '13px' }}>{s.label}</span>
-                <span style={{ fontSize: '11px', opacity: 0.7, marginTop: '2px' }}>{s.desc}</span>
-              </button>
-            ))}
+            {SCENARIOS.map(s => {
+              const Icon = s.icon;
+              return (
+                <button
+                  key={s.value}
+                  className={`option-pill ${scenario === s.value ? 'selected' : ''}`}
+                  onClick={() => setScenario(s.value)}
+                  type="button"
+                  style={{ flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left', padding: '14px 16px' }}
+                >
+                  <Icon size={20} className="option-pill-icon" style={{ marginBottom: '4px' }} />
+                  <span style={{ fontWeight: 600, fontSize: '13px' }}>{s.label}</span>
+                  <span style={{ fontSize: '11px', opacity: 0.7, marginTop: '2px' }}>{s.desc}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
         {/* Client Personality */}
         <div className="setup-field-section">
-          <label className="setup-field-label">Client Personality</label>
+          <label className="setup-field-label">Client Persona</label>
           <div className="options-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
-            {CLIENT_PERSONALITIES.map(c => (
-              <button
-                key={c.value}
-                className={`option-pill ${clientPersonality === c.value ? 'selected' : ''}`}
-                onClick={() => setClientPers(c.value)}
-                type="button"
-              >
-                <span className="option-pill-icon">{c.icon}</span>
-                <span style={{ fontWeight: 600 }}>{c.label}</span>
-                <span style={{ fontSize: '11px', opacity: 0.7 }}>{c.desc}</span>
-              </button>
-            ))}
+            {CLIENT_PERSONALITIES.map(c => {
+              const Icon = c.icon;
+              return (
+                <button
+                  key={c.value}
+                  className={`option-pill ${clientPersonality === c.value ? 'selected' : ''}`}
+                  onClick={() => setClientPers(c.value)}
+                  type="button"
+                >
+                  <Icon size={18} className="option-pill-icon" />
+                  <span style={{ fontWeight: 600 }}>{c.label}</span>
+                  <span style={{ fontSize: '11px', opacity: 0.7 }}>{c.desc}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
         {/* Coach Style */}
         <div className="setup-field-section">
-          <label className="setup-field-label">Coach Style</label>
+          <label className="setup-field-label">Coach Persona</label>
           <div className="options-grid">
-            {COACHES.map(c => (
-              <button
-                key={c.value}
-                className={`option-pill ${coach === c.value ? 'selected' : ''}`}
-                onClick={() => setCoach(c.value)}
-                type="button"
-              >
-                <span className="option-pill-icon">{c.icon}</span>
-                {c.label}
-              </button>
-            ))}
+            {COACHES.map(c => {
+              const Icon = c.icon;
+              return (
+                <button
+                  key={c.value}
+                  className={`option-pill ${coach === c.value ? 'selected' : ''}`}
+                  onClick={() => setCoach(c.value)}
+                  type="button"
+                >
+                  <Icon size={18} className="option-pill-icon" />
+                  <span>{c.label}</span>
+                </button>
+              );
+            })}
           </div>
-        </div>
-
-        {/* AI Provider */}
-        <div className="setup-field-section">
-          <label className="setup-field-label"><Zap size={14} /> AI Provider</label>
-          <div className="provider-selector">
-            {PROVIDERS.map(p => (
-              <button
-                key={p}
-                className={`provider-select-pill ${provider === p ? 'selected' : ''}`}
-                onClick={() => setProvider(p)}
-                type="button"
-              >
-                {p.charAt(0).toUpperCase() + p.slice(1)}
-                {!keysLoading && !configuredKeys.includes(p) && (
-                  <span style={{ marginLeft: 4, opacity: 0.6 }}>✗</span>
-                )}
-              </button>
-            ))}
-          </div>
-          {!keysLoading && !hasKey && (
-            <div className="no-key-warning">
-              <AlertTriangle size={16} style={{ flexShrink: 0, marginTop: 2 }} />
-              <span>
-                No {provider} API key configured.{' '}
-                <Link to="/settings">Add your key in Settings</Link> to start practicing.
-              </span>
-            </div>
-          )}
         </div>
 
         {/* Start Button */}
         <button
           className="btn setup-start-btn"
           onClick={handleStart}
-          disabled={loading || keysLoading || !hasKey}
+          disabled={loading}
         >
           {loading ? <Loader2 size={18} className="spin" /> : <Users size={18} />}
-          {loading ? 'Starting Session...' : 'Start Client Session'}
+          {loading ? 'Starting Session...' : 'Start Client Practice'}
         </button>
 
       </div>

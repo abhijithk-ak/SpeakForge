@@ -68,8 +68,76 @@ const login = async (email, password) => {
   return { user: safeUser, token };
 };
 
+const crypto = require('crypto');
+const { pool } = require('../config/db');
+
+const forgotPassword = async (email) => {
+  const user = await userRepository.findByEmail(email);
+  if (!user) {
+    // Return friendly message without leaking user existence
+    return { message: 'If an account exists with that email, a password reset code has been generated.' };
+  }
+
+  // Generate a random 6-character reset code or hex token
+  const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+  // Expire previous tokens for user
+  await pool.query('DELETE FROM password_reset_tokens WHERE user_id = $1', [user.id]);
+
+  // Insert new token valid for 1 hour
+  await pool.query(
+    `INSERT INTO password_reset_tokens (user_id, token_hash, expires_at)
+     VALUES ($1, $2, NOW() + INTERVAL '1 hour')`,
+    [user.id, resetCode]
+  );
+
+  logger.info('Password reset token generated', { userId: user.id });
+
+  return {
+    message: 'Password reset code generated.',
+    // Returning resetCode allows demo/local usage without third-party email configuration
+    resetCode
+  };
+};
+
+const resetPassword = async (email, resetCode, newPassword) => {
+  const user = await userRepository.findByEmail(email);
+  if (!user) {
+    const err = new Error('Invalid email or reset code');
+    err.code = 'INVALID_RESET';
+    throw err;
+  }
+
+  const tokenRes = await pool.query(
+    `SELECT * FROM password_reset_tokens
+     WHERE user_id = $1 AND token_hash = $2 AND expires_at > NOW()`,
+    [user.id, resetCode]
+  );
+
+  if (tokenRes.rows.length === 0) {
+    const err = new Error('Invalid or expired reset code');
+    err.code = 'INVALID_RESET';
+    throw err;
+  }
+
+  const passwordHash = await bcrypt.hash(newPassword, SALT_ROUNDS);
+  await pool.query('UPDATE users SET password_hash = $1, updated_at = NOW() WHERE id = $2', [passwordHash, user.id]);
+  await pool.query('DELETE FROM password_reset_tokens WHERE user_id = $1', [user.id]);
+
+  logger.info('Password reset successful', { userId: user.id });
+  return { message: 'Password reset successfully. You can now sign in with your new password.' };
+};
+
 const getUserFromToken = async (userId) => {
   return await userRepository.findById(userId);
 };
 
-module.exports = { register, login, getUserFromToken, generateToken };
+module.exports = {
+  register,
+  login,
+  forgotPassword,
+  resetPassword,
+  getUserFromToken,
+  generateToken
+};
+

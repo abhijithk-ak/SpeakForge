@@ -1,74 +1,105 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Mic, Zap, Loader2, AlertTriangle } from 'lucide-react';
+import {
+  ArrowLeft, Mic, Zap, Loader2, AlertTriangle, Cpu, Globe,
+  FlaskConical, Briefcase, Compass, Landmark, Dices, Sparkles, Check
+} from 'lucide-react';
 import { createSession } from '../../services/sessionService';
-import { getKeys } from '../../services/apiKeyService';
+import api from '../../services/api';
 import './SetupPages.css';
 
-const TOPIC_CATEGORIES = [
-  { value: 'technology',    label: 'Technology',    icon: '💻' },
-  { value: 'philosophy',    label: 'Philosophy',    icon: '🧠' },
-  { value: 'current-events',label: 'Current Events',icon: '🌍' },
-  { value: 'leadership',    label: 'Leadership',    icon: '🎯' },
-  { value: 'custom',        label: 'Custom Topic',  icon: '✏️' },
+const CATEGORIES = [
+  { id: 'technology', label: 'Technology', icon: Cpu },
+  { id: 'society', label: 'Society & Culture', icon: Globe },
+  { id: 'science', label: 'Science', icon: FlaskConical },
+  { id: 'business', label: 'Business & Career', icon: Briefcase },
+  { id: 'philosophy', label: 'Life & Philosophy', icon: Compass },
+  { id: 'india', label: 'India & Emerging Markets', icon: Landmark }
 ];
 
 const DURATIONS = [
-  { value: 60,  label: '1 Minute' },
+  { value: 60, label: '1 Minute' },
   { value: 120, label: '2 Minutes' },
-  { value: 180, label: '3 Minutes' },
+  { value: 180, label: '3 Minutes' }
 ];
-
-const COACHES = [
-  { value: 'professional', label: 'Professional', icon: '💼' },
-  { value: 'friendly',     label: 'Friendly',     icon: '😊' },
-  { value: 'challenging',  label: 'Challenging',  icon: '🔥' },
-  { value: 'mentor',       label: 'Mentor',       icon: '📚' },
-];
-
-const PROVIDERS = ['groq', 'gemini', 'openai'];
 
 export default function SpeechSetupPage() {
   const navigate = useNavigate();
 
-  const [topicCategory, setCategory]  = useState('technology');
-  const [customTopic,   setCustom]    = useState('');
-  const [duration,      setDuration]  = useState(120);
-  const [coach,         setCoach]     = useState('professional');
-  const [provider,      setProvider]  = useState('groq');
-  const [configuredKeys, setConfigured] = useState([]);
-  const [loading,       setLoading]   = useState(false);
-  const [keysLoading,   setKeysLoading] = useState(true);
+  const [category, setCategory] = useState('technology');
+  const [selectedTopic, setSelectedTopic] = useState('Should AI development be regulated by international treaties?');
+  const [customTopic, setCustomTopic] = useState('');
+  const [isCustom, setIsCustom] = useState(false);
+  const [duration, setDuration] = useState(120);
+
+  // Slot machine animation state
+  const [isSpinning, setIsSpinning] = useState(false);
+  const [reelWords, setReelWords] = useState([
+    'AI Ethics', 'Quantum Computing', 'Remote Work', 'Cybersecurity', 'Open Source', 'Space Exploration', 'Nuclear Fusion', 'Data Privacy'
+  ]);
+
+  // Provider state
+  const [userSettings, setUserSettings] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    getKeys()
-      .then(keys => {
-        setConfigured(keys.map(k => k.provider));
-        const first = PROVIDERS.find(p => keys.some(k => k.provider === p));
-        if (first) setProvider(first);
-      })
-      .catch(() => {})
-      .finally(() => setKeysLoading(false));
+    api.get('/settings').then(res => {
+      setUserSettings(res.data?.data || {});
+    }).catch(() => {});
   }, []);
 
-  const hasKey = configuredKeys.includes(provider);
-  const topic  = topicCategory === 'custom' ? customTopic.trim() : topicCategory;
+  // Spin Random Topic
+  const handleRandomTopic = async () => {
+    if (isSpinning) return;
+    setIsSpinning(true);
+    setIsCustom(false);
+
+    try {
+      const res = await api.get('/topics/random', { params: { category } });
+      const data = res.data?.data;
+      if (data?.reelWords) {
+        setReelWords(data.reelWords);
+      }
+
+      // Slot machine animation stops after 1.5s
+      setTimeout(() => {
+        if (data?.topic) {
+          setSelectedTopic(data.topic);
+        }
+        setIsSpinning(false);
+      }, 1500);
+    } catch {
+      setTimeout(() => {
+        setIsSpinning(false);
+      }, 1200);
+    }
+  };
+
+  const activeTopic = isCustom ? customTopic.trim() : selectedTopic;
 
   const handleStart = async () => {
-    if (!hasKey || loading) return;
+    if (!activeTopic || loading) return;
     setLoading(true);
+
+    const provider = userSettings?.ai_provider || 'groq';
+
     try {
       const session = await createSession({
-        mode:              'speech',
-        role:              topic || 'general speech',
-        coach_personality: coach,
-        difficulty:        'intermediate'
+        mode: 'speech',
+        role: activeTopic,
+        coach_personality: 'professional',
+        difficulty: 'intermediate'
       });
+
       navigate(`/session/${session.id}`, {
-        state: { provider, topic, scenario: null }
+        state: {
+          provider,
+          topic: activeTopic,
+          durationSeconds: duration
+        }
       });
     } catch (err) {
-      console.error('Failed to create session:', err);
+      console.error('Failed to create speech session:', err);
       setLoading(false);
     }
   };
@@ -80,60 +111,107 @@ export default function SpeechSetupPage() {
           <ArrowLeft size={16} /> Back to Practice
         </button>
         <div className="setup-mode-badge">
-          <Mic size={14} /> Speech Practice
+          <Mic size={14} /> 2-Minute Speech
         </div>
-        <h1 className="setup-title">Configure Your Speech</h1>
+        <h1 className="setup-title">Prepare Your Speech</h1>
         <p className="setup-subtitle">
-          Build confidence delivering structured, impactful 2-minute speeches.
+          Practice uninterrupted speech delivery on engaging, structured topics.
         </p>
       </div>
 
       <div className="setup-form-card">
 
-        {/* Topic Category */}
+        {/* Category Filter */}
         <div className="setup-field-section">
-          <label className="setup-field-label">Topic Category</label>
-          <div className="options-grid">
-            {TOPIC_CATEGORIES.map(t => (
-              <button
-                key={t.value}
-                className={`option-pill ${topicCategory === t.value ? 'selected' : ''}`}
-                onClick={() => setCategory(t.value)}
-                type="button"
-              >
-                <span className="option-pill-icon">{t.icon}</span>
-                {t.label}
-              </button>
-            ))}
+          <label className="setup-field-label">Topic Domain</label>
+          <div className="domain-chips-grid">
+            {CATEGORIES.map(cat => {
+              const Icon = cat.icon;
+              const isSelected = category === cat.id;
+              return (
+                <button
+                  key={cat.id}
+                  type="button"
+                  className={`domain-chip ${isSelected ? 'selected' : ''}`}
+                  onClick={() => {
+                    setCategory(cat.id);
+                    setIsCustom(false);
+                  }}
+                >
+                  <Icon size={16} />
+                  <span>{cat.label}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
-        {/* Custom Topic Input */}
-        {topicCategory === 'custom' && (
-          <div className="setup-field-section">
-            <label className="setup-field-label">Your Topic</label>
+        {/* Slot Machine Reel / Topic Box */}
+        <div className="setup-field-section">
+          <div className="auth-label-row">
+            <label className="setup-field-label">Speech Prompt</label>
+            <button
+              type="button"
+              className="toggle-custom-link"
+              onClick={() => setIsCustom(!isCustom)}
+            >
+              {isCustom ? 'Pick from topics' : 'Write my own topic'}
+            </button>
+          </div>
+
+          {isCustom ? (
             <input
               type="text"
               className="setup-text-input"
-              placeholder="e.g. The future of renewable energy..."
+              placeholder="Enter your speech topic or question..."
               value={customTopic}
-              onChange={e => setCustom(e.target.value)}
-              maxLength={150}
+              onChange={e => setCustomTopic(e.target.value)}
               autoFocus
             />
-          </div>
-        )}
+          ) : (
+            <div className="topic-display-box">
+              <div className="slot-machine-frame">
+                {isSpinning ? (
+                  <div className="topic-reel-container">
+                    <div className="topic-reel reel-1">
+                      {reelWords.slice(0, 8).map((w, idx) => (
+                        <div key={idx} className="reel-item">{w}</div>
+                      ))}
+                    </div>
+                    <div className="topic-reel reel-2">
+                      {reelWords.slice(4, 12).map((w, idx) => (
+                        <div key={idx} className="reel-item">{w}</div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <p className="topic-text-active">"{selectedTopic}"</p>
+                )}
+              </div>
 
-        {/* Duration */}
+              <button
+                type="button"
+                className="btn btn-secondary random-spin-btn"
+                onClick={handleRandomTopic}
+                disabled={isSpinning}
+              >
+                <Dices size={16} className={isSpinning ? 'spin' : ''} />
+                {isSpinning ? 'Discovering Topic...' : 'Random Topic'}
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Duration Selection */}
         <div className="setup-field-section">
           <label className="setup-field-label">Target Duration</label>
           <div className="options-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
             {DURATIONS.map(d => (
               <button
                 key={d.value}
+                type="button"
                 className={`option-pill ${duration === d.value ? 'selected' : ''}`}
                 onClick={() => setDuration(d.value)}
-                type="button"
               >
                 {d.label}
               </button>
@@ -141,61 +219,14 @@ export default function SpeechSetupPage() {
           </div>
         </div>
 
-        {/* Coach Personality */}
-        <div className="setup-field-section">
-          <label className="setup-field-label">Coach Style</label>
-          <div className="options-grid">
-            {COACHES.map(c => (
-              <button
-                key={c.value}
-                className={`option-pill ${coach === c.value ? 'selected' : ''}`}
-                onClick={() => setCoach(c.value)}
-                type="button"
-              >
-                <span className="option-pill-icon">{c.icon}</span>
-                {c.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* AI Provider */}
-        <div className="setup-field-section">
-          <label className="setup-field-label"><Zap size={14} /> AI Provider</label>
-          <div className="provider-selector">
-            {PROVIDERS.map(p => (
-              <button
-                key={p}
-                className={`provider-select-pill ${provider === p ? 'selected' : ''}`}
-                onClick={() => setProvider(p)}
-                type="button"
-              >
-                {p.charAt(0).toUpperCase() + p.slice(1)}
-                {!keysLoading && !configuredKeys.includes(p) && (
-                  <span style={{ marginLeft: 4, opacity: 0.6 }}>✗</span>
-                )}
-              </button>
-            ))}
-          </div>
-          {!keysLoading && !hasKey && (
-            <div className="no-key-warning">
-              <AlertTriangle size={16} style={{ flexShrink: 0, marginTop: 2 }} />
-              <span>
-                No {provider} API key configured.{' '}
-                <Link to="/settings">Add your key in Settings</Link> to start practicing.
-              </span>
-            </div>
-          )}
-        </div>
-
         {/* Start Button */}
         <button
           className="btn setup-start-btn"
           onClick={handleStart}
-          disabled={loading || keysLoading || !hasKey || (topicCategory === 'custom' && !customTopic.trim())}
+          disabled={loading || !activeTopic}
         >
           {loading ? <Loader2 size={18} className="spin" /> : <Mic size={18} />}
-          {loading ? 'Starting Session...' : 'Start Speech Session'}
+          {loading ? 'Starting Speech...' : `Begin ${duration / 60}-Minute Speech`}
         </button>
 
       </div>

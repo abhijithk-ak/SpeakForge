@@ -1,138 +1,165 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, CheckCircle, Sparkles, Loader } from 'lucide-react';
+import {
+  GraduationCap, Briefcase, Sparkles, Rocket, RefreshCw,
+  CheckCircle, ArrowLeft, ArrowRight, Mic, Volume2, Loader, Check
+} from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { completeOnboarding } from '../services/profileService';
 import './OnboardingPage.css';
 
-const STEP_OPTIONS = {
-  1: {
-    title: "What do you currently do?",
-    subtitle: "Select the option that best describes your background.",
-    key: "role",
-    options: [
-      { value: "student", label: "Student" },
-      { value: "graduate", label: "Recent graduate" },
-      { value: "developer", label: "Software developer" },
-      { value: "professional", label: "Other professional" },
-      { value: "other", label: "Other" }
-    ]
-  },
-  2: {
-    title: "Experience level",
-    subtitle: "How long have you worked in your field?",
-    key: "experience_level",
-    options: [
-      { value: "beginner", label: "Beginner", desc: "No professional experience yet" },
-      { value: "entry", label: "Entry level", desc: "Less than 1 year of experience" },
-      { value: "intermediate", label: "Intermediate", desc: "1–3 years of experience" },
-      { value: "experienced", label: "Experienced", desc: "3+ years of experience" }
-    ]
-  },
-  3: {
-    title: "Why are you here?",
-    subtitle: "Select your primary communication goal.",
-    key: "primary_goal",
-    options: [
-      { value: "interviews", label: "Prepare for job interviews" },
-      { value: "communication", label: "Improve communication skills" },
-      { value: "confidence", label: "Build speaking confidence" },
-      { value: "client", label: "Practice client communication" },
-      { value: "speaking", label: "Public speaking improvement" }
-    ]
-  },
-  4: {
-    title: "Employment status",
-    subtitle: "What is your current work status?",
-    key: "employment_status",
-    options: [
-      { value: "seeking", label: "Currently job seeking" },
-      { value: "student", label: "Student" },
-      { value: "employed", label: "Employed" },
-      { value: "other", label: "Other" }
-    ]
-  }
-};
+const ROLES = [
+  { id: 'school_student', label: 'School Student', icon: GraduationCap },
+  { id: 'college_student', label: 'College / University Student', icon: GraduationCap },
+  { id: 'working_professional', label: 'Working Professional', icon: Briefcase },
+  { id: 'fresher', label: 'Fresher / Recent Graduate', icon: Sparkles },
+  { id: 'entrepreneur', label: 'Entrepreneur / Founder', icon: Rocket },
+  { id: 'career_switcher', label: 'Career Switcher', icon: RefreshCw },
+];
 
-function OnboardingPage() {
+const FIELDS = [
+  'Technology', 'Engineering', 'Finance', 'Healthcare', 'Law',
+  'Marketing', 'Design', 'Education', 'Sales', 'Other'
+];
+
+const GOALS = [
+  'Job Interviews', 'Client Meetings', 'Public Speaking',
+  'Presentations', 'English Fluency', 'Confidence', 'Technical Explanation'
+];
+
+const EXPERIENCE_LEVELS = [
+  { id: 'beginner', label: 'Beginner', desc: 'Just starting out, learning the fundamentals' },
+  { id: 'intermediate', label: 'Intermediate', desc: 'Comfortable with basic conversations, looking to sharpen delivery' },
+  { id: 'advanced', label: 'Advanced', desc: 'Experienced communicator looking for rigorous feedback and mastery' },
+];
+
+export default function OnboardingPage() {
   const { updateUser } = useAuth();
   const navigate = useNavigate();
 
   const [step, setStep] = useState(1);
-  const [answers, setAnswers] = useState({
-    role: '',
-    experience_level: '',
-    primary_goal: '',
-    employment_status: '',
-    target_role: ''
-  });
-  const [error, setError] = useState('');
+  const [role, setRole] = useState('');
+  const [fields, setFields] = useState([]);
+  const [goals, setGoals] = useState([]);
+  const [experience, setExperience] = useState('intermediate');
+  const [isTestingMic, setIsTestingMic] = useState(false);
+  const [micWorking, setMicWorking] = useState(false);
+  const [audioLevel, setAudioLevel] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSelectOption = (key, value) => {
-    setAnswers(prev => ({ ...prev, [key]: value }));
-    setError('');
-  };
+  const audioCtxRef = useRef(null);
+  const analyserRef = useRef(null);
+  const animFrameRef = useRef(null);
 
-  const handleNext = () => {
-    if (step < 5) {
-      setStep(prev => prev + 1);
+  // Toggle multi-select chips
+  const toggleChip = (list, setList, item) => {
+    if (list.includes(item)) {
+      setList(list.filter(i => i !== item));
+    } else {
+      setList([...list, item]);
     }
   };
 
-  const handleBack = () => {
-    if (step > 1) {
-      setStep(prev => prev - 1);
-      setError('');
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    if (e) e.preventDefault();
-    setError('');
-    setIsLoading(true);
-
+  // Test microphone audio level with Web Audio API
+  const testMicrophone = async () => {
     try {
-      // Complete onboarding via API
+      setIsTestingMic(true);
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
+      const source = audioCtxRef.current.createMediaStreamSource(stream);
+      analyserRef.current = audioCtxRef.current.createAnalyser();
+      analyserRef.current.fftSize = 256;
+      source.connect(analyserRef.current);
+
+      const bufferLength = analyserRef.current.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+
+      const updateMeter = () => {
+        if (!analyserRef.current) return;
+        analyserRef.current.getByteFrequencyData(dataArray);
+        let sum = 0;
+        for (let i = 0; i < bufferLength; i++) {
+          sum += dataArray[i];
+        }
+        const average = sum / bufferLength;
+        const normalized = Math.min(Math.round((average / 128) * 100), 100);
+        setAudioLevel(normalized);
+        if (normalized > 10) {
+          setMicWorking(true);
+        }
+        animFrameRef.current = requestAnimationFrame(updateMeter);
+      };
+
+      updateMeter();
+
+      // Play AI voice sample
+      if (window.speechSynthesis) {
+        const utt = new SpeechSynthesisUtterance("Welcome to SpeakForge. I am your voice coach. Speak a sentence to test your microphone.");
+        utt.rate = 1.0;
+        window.speechSynthesis.speak(utt);
+      }
+    } catch (err) {
+      console.warn('Mic check error:', err);
+      setIsTestingMic(false);
+      setMicWorking(true); // Don't block user if permission dismissed
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+      if (audioCtxRef.current) audioCtxRef.current.close().catch(() => {});
+    };
+  }, []);
+
+  const handleFinish = async () => {
+    setIsLoading(true);
+    setError('');
+    try {
       await completeOnboarding({
-        role: answers.role,
-        experience_level: answers.experience_level,
-        primary_goal: answers.primary_goal,
-        employment_status: answers.employment_status,
-        target_role: answers.target_role || null
+        role,
+        fields,
+        goals,
+        experience,
+        experience_level: experience,
+        primary_goal: goals[0] || 'Confidence',
+        industry: fields[0] || 'General'
       });
 
-      // Update local auth context cache
       updateUser({ onboarding_completed: true });
-
-      // Navigate to dashboard
       navigate('/dashboard');
     } catch (err) {
-      const msg = err.response?.data?.error?.message || 'Onboarding completion failed. Please try again.';
-      setError(msg);
+      console.error('Onboarding save failed:', err);
+      updateUser({ onboarding_completed: true });
+      navigate('/dashboard');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const currentStepConfig = STEP_OPTIONS[step];
-  const selectedValue = currentStepConfig ? answers[currentStepConfig.key] : null;
-  const isNextDisabled = currentStepConfig && !selectedValue;
-
   return (
     <div className="onboard-page">
       <div className="onboard-card">
-        {/* Progress Tracker */}
+
+        {/* Progress Header */}
         <div className="onboard-progress-header">
           <span className="progress-text">Step {step} of 5</span>
           <div className="progress-dots-row">
             {[1, 2, 3, 4, 5].map(s => (
-              <div 
-                key={s} 
+              <div
+                key={s}
                 className={`progress-dot ${s === step ? 'active' : ''} ${s < step ? 'completed' : ''}`}
-              ></div>
+              />
             ))}
           </div>
+          <button
+            type="button"
+            className="onboard-skip-top-btn"
+            onClick={handleFinish}
+          >
+            Skip to Dashboard
+          </button>
         </div>
 
         {error && (
@@ -141,25 +168,102 @@ function OnboardingPage() {
           </div>
         )}
 
-        {/* Dynamic Step Content */}
-        {step < 5 ? (
+        {/* STEP 1: Who are you? */}
+        {step === 1 && (
           <div className="onboard-step-body">
-            <h1 className="onboard-step-title">{currentStepConfig.title}</h1>
-            <p className="onboard-step-subtitle">{currentStepConfig.subtitle}</p>
+            <h1 className="onboard-step-title">Who are you?</h1>
+            <p className="onboard-step-subtitle">This helps your AI coach calibrate scenario context and tone.</p>
 
             <div className="onboard-options-grid">
-              {currentStepConfig.options.map(opt => {
-                const isSelected = selectedValue === opt.value;
+              {ROLES.map(r => {
+                const Icon = r.icon;
+                const isSelected = role === r.id;
                 return (
                   <button
-                    key={opt.value}
+                    key={r.id}
                     type="button"
                     className={`onboard-option-card ${isSelected ? 'selected' : ''}`}
-                    onClick={() => handleSelectOption(currentStepConfig.key, opt.value)}
+                    onClick={() => setRole(r.id)}
+                  >
+                    <Icon size={20} className="option-card-icon" />
+                    <span className="option-label-text">{r.label}</span>
+                    {isSelected && <CheckCircle size={18} className="option-selected-icon" />}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* STEP 2: Field */}
+        {step === 2 && (
+          <div className="onboard-step-body">
+            <h1 className="onboard-step-title">What is your field?</h1>
+            <p className="onboard-step-subtitle">Select all industries or domains relevant to your practice.</p>
+
+            <div className="onboard-chips-wrap">
+              {FIELDS.map(f => {
+                const isSelected = fields.includes(f);
+                return (
+                  <button
+                    key={f}
+                    type="button"
+                    className={`onboard-chip ${isSelected ? 'selected' : ''}`}
+                    onClick={() => toggleChip(fields, setFields, f)}
+                  >
+                    {f}
+                    {isSelected && <Check size={14} />}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* STEP 3: Goals */}
+        {step === 3 && (
+          <div className="onboard-step-body">
+            <h1 className="onboard-step-title">What do you want to improve?</h1>
+            <p className="onboard-step-subtitle">Pick the areas you want to prioritize in your coaching.</p>
+
+            <div className="onboard-chips-wrap">
+              {GOALS.map(g => {
+                const isSelected = goals.includes(g);
+                return (
+                  <button
+                    key={g}
+                    type="button"
+                    className={`onboard-chip ${isSelected ? 'selected' : ''}`}
+                    onClick={() => toggleChip(goals, setGoals, g)}
+                  >
+                    {g}
+                    {isSelected && <Check size={14} />}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* STEP 4: Experience Level */}
+        {step === 4 && (
+          <div className="onboard-step-body">
+            <h1 className="onboard-step-title">Your experience level?</h1>
+            <p className="onboard-step-subtitle">Your coach will match vocabulary complexity and challenge depth.</p>
+
+            <div className="onboard-options-list">
+              {EXPERIENCE_LEVELS.map(lvl => {
+                const isSelected = experience === lvl.id;
+                return (
+                  <button
+                    key={lvl.id}
+                    type="button"
+                    className={`onboard-option-card ${isSelected ? 'selected' : ''}`}
+                    onClick={() => setExperience(lvl.id)}
                   >
                     <div className="option-label-group">
-                      <span className="option-label-text">{opt.label}</span>
-                      {opt.desc && <span className="option-desc-text">{opt.desc}</span>}
+                      <span className="option-label-text">{lvl.label}</span>
+                      <span className="option-desc-text">{lvl.desc}</span>
                     </div>
                     {isSelected && <CheckCircle size={18} className="option-selected-icon" />}
                   </button>
@@ -167,91 +271,82 @@ function OnboardingPage() {
               })}
             </div>
           </div>
-        ) : (
-          /* Step 5 - Target Role Text Input */
+        )}
+
+        {/* STEP 5: Voice & Mic Check */}
+        {step === 5 && (
           <div className="onboard-step-body">
-            <div className="step-icon-badge">
-              <Sparkles size={24} className="badge-spark-icon" />
-            </div>
-            <h1 className="onboard-step-title">What role are you targeting?</h1>
-            <p className="onboard-step-subtitle">This helps the AI Coach customize interview scenarios and questions for you.</p>
+            <h1 className="onboard-step-title">Quick voice check</h1>
+            <p className="onboard-step-subtitle">Ensure your microphone and browser audio are ready for live voice coaching.</p>
 
-            <form onSubmit={handleSubmit} className="onboard-text-form">
-              <div className="text-field-container">
-                <input
-                  type="text"
-                  className="onboard-text-input"
-                  placeholder="e.g. Software Engineer, Product Manager"
-                  value={answers.target_role}
-                  onChange={e => setAnswers(prev => ({ ...prev, target_role: e.target.value }))}
-                  disabled={isLoading}
-                />
-              </div>
-
-              <div className="onboard-footer-actions">
+            <div className="voice-check-container">
+              {!isTestingMic ? (
                 <button
                   type="button"
-                  className="btn btn-secondary onboard-back-btn"
-                  onClick={handleBack}
-                  disabled={isLoading}
+                  className="btn btn-primary mic-test-start-btn"
+                  onClick={testMicrophone}
                 >
-                  <ArrowLeft size={16} /> Back
+                  <Mic size={18} /> Test Microphone & Voice
                 </button>
-
-                <div className="footer-right-actions">
-                  <button
-                    type="submit"
-                    className="btn btn-secondary onboard-skip-btn"
-                    disabled={isLoading}
-                  >
-                    Skip
-                  </button>
-                  <button
-                    type="submit"
-                    className="btn btn-primary onboard-submit-btn"
-                    disabled={isLoading}
-                  >
-                    {isLoading ? (
-                      <><Loader size={16} className="spin" /> Submitting...</>
+              ) : (
+                <div className="mic-live-meter-wrap">
+                  <div className="meter-visual">
+                    <div
+                      className="meter-bar-fill"
+                      style={{ width: `${Math.max(audioLevel, 8)}%` }}
+                    />
+                  </div>
+                  <div className="meter-status">
+                    {micWorking ? (
+                      <span className="meter-status-ok"><CheckCircle size={16} /> Microphone is working!</span>
                     ) : (
-                      <>Finish <ArrowRight size={16} /></>
+                      <span>Speak into your microphone now...</span>
                     )}
-                  </button>
+                  </div>
                 </div>
-              </div>
-            </form>
+              )}
+            </div>
           </div>
         )}
 
-        {/* Global Footer Actions for steps 1-4 */}
-        {step < 5 && (
-          <div className="onboard-footer-actions">
-            {step > 1 ? (
-              <button
-                type="button"
-                className="btn btn-secondary onboard-back-btn"
-                onClick={handleBack}
-              >
-                <ArrowLeft size={16} /> Back
-              </button>
-            ) : (
-              <div className="back-btn-spacer"></div>
-            )}
+        {/* Footer Actions */}
+        <div className="onboard-footer-actions">
+          {step > 1 ? (
+            <button
+              type="button"
+              className="btn btn-secondary onboard-back-btn"
+              onClick={() => setStep(step - 1)}
+              disabled={isLoading}
+            >
+              <ArrowLeft size={16} /> Back
+            </button>
+          ) : <div className="back-btn-spacer" />}
 
+          {step < 5 ? (
             <button
               type="button"
               className="btn btn-primary onboard-next-btn"
-              onClick={handleNext}
-              disabled={isNextDisabled}
+              onClick={() => setStep(step + 1)}
             >
               Continue <ArrowRight size={16} />
             </button>
-          </div>
-        )}
+          ) : (
+            <button
+              type="button"
+              className="btn btn-primary onboard-submit-btn"
+              onClick={handleFinish}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <><Loader size={16} className="spin" /> Setting up coach...</>
+              ) : (
+                <>Start Practicing <ArrowRight size={16} /></>
+              )}
+            </button>
+          )}
+        </div>
 
       </div>
     </div>
   );
 }
-
-export default OnboardingPage;

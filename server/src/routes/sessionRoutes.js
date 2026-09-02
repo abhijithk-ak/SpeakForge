@@ -7,6 +7,7 @@ const {
   getSession,
   startSession,
   processTurn,
+  streamTurn,
   endSession
 } = require('../controllers/sessionController');
 
@@ -17,6 +18,7 @@ router.get('/',                getSessions);
 router.get('/:id',             getSession);
 router.post('/:id/start',      startSession);
 router.post('/:id/turn',       processTurn);
+router.post('/:id/stream',     streamTurn);
 router.post('/:id/end',        endSession);
 
 module.exports = router;
